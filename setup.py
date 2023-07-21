@@ -38,7 +38,7 @@ setup(
     extras_require={
         'annoy': ["annoy==1.17.3"],
         'tantity': [
-            "-e git+https://github.com/leftshiftone/tantivy-py.git#egg=tantivy",
+            "tantivy@git+https://github.com/leftshiftone/tantivy-py.git#egg=tantivy",
             "stop-words==2018.7.23",
             "simplemma==0.9.1"
         ]
