@@ -1,0 +1,4 @@
+annoy==1.17.3
+-e git+https://github.com/quickwit-oss/tantivy-py.git#egg=tantivy
+stop-words
+simplemma
