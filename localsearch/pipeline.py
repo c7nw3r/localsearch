@@ -14,9 +14,9 @@ class SearchPipeline:
         self.readers = readers
         self.reranker = reranker
 
-    def search(self, query: str) -> List[RankedDocument]:
+    def search(self, query: str, index_field: str = "text") -> List[RankedDocument]:
         results = flatten([reader.read(query) for reader in self.readers])
-        queries = list(map(lambda x: (query, x.document.fields["text"]), results))
+        queries = list(map(lambda x: (query, x.document.fields[index_field]), results))
 
         if len(queries) == 0:
             return []
