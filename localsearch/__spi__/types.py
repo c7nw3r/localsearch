@@ -26,13 +26,11 @@ class Vector(Protocol, Sized):
     def __getitem__(self, __index: int) -> float: ...
 
 
-class Encoder(ABC):
+class Encoder(Protocol):
 
-    @abstractmethod
     def get_output_dim(self) -> int:
         pass
 
-    @abstractmethod
     def __call__(self, texts: Union[str, List[str]]) -> Vector:
         pass
 
@@ -40,9 +38,8 @@ class Encoder(ABC):
 TextPair = Tuple[str, str]
 
 
-class CrossEncoder(ABC):
+class CrossEncoder(Protocol):
 
-    @abstractmethod
     def __call__(self, texts: Union[TextPair, List[TextPair]]) -> Vector:
         pass
 
