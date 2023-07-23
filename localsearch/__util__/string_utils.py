@@ -16,4 +16,8 @@ def remove_stopwords(text: str, lang: str):
 
 def lemmatize(text: str, lang: str):
     import simplemma
-    return " ".join([simplemma.lemmatize(token, lang=lang) for token in text.split(" ")])
+
+    tokens = text.split(" ")
+    tokens = [token for token in tokens if len(token) > 0]
+
+    return " ".join([simplemma.lemmatize(token, lang=lang) for token in tokens])
