@@ -28,7 +28,7 @@ class SearchPipeline:
         def to_ranked_document(document: ScoredDocument, rank_score: float):
             return RankedDocument(score=document.score, document=document.document, rank_score=rank_score)
 
-        results = [to_ranked_document(result, score) for result, score in zip(results, scores)]
+        results = [to_ranked_document(result, score.item()) for result, score in zip(results, scores)]
         results = [results[i] for i in indices]
         results = unique(results, lambda x: x.document.id)
         return list(filter(lambda x: x.rank_score >= 0.001, results))
