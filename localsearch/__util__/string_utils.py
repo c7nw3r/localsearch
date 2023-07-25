@@ -21,3 +21,8 @@ def lemmatize(text: str, lang: str):
     tokens = [token for token in tokens if len(token) > 0]
 
     return " ".join([simplemma.lemmatize(token, lang=lang) for token in tokens])
+
+
+def md5(text: str):
+    from hashlib import md5
+    return str(md5(text.encode("utf-8")).hexdigest())
