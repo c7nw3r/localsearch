@@ -88,8 +88,6 @@ class AnnoySearch(Reader, Writer):
 
         For performance reasons it is recommended to append documents in batches.
         """
-        print("rebuild")
-
         folder = self.path.replace(".ann", "")
         new_index = self.AnnoyIndex(self.encoder.get_output_dim(), 'euclidean')
         for path in os.listdir(folder):
