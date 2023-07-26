@@ -1,6 +1,10 @@
+from typing import List, Dict
+
 import numpy as np
 from numpy import matmul
 from numpy.linalg import norm
+
+from localsearch import ScoredDocument
 
 
 def cosine_similarity(a, b) -> float:
@@ -13,17 +17,27 @@ def cosine_similarity(a, b) -> float:
     return min(1.0, similarity)
 
 
-def unique(array: list, get_key):
-    keys = []
-    vals = []
+def sort(array: List[ScoredDocument]):
+    def sort_by_score(document: ScoredDocument):
+        return document.score
+
+    return list(sorted(array, key=sort_by_score))
+
+
+def unique(array: List[ScoredDocument], get_key):
+    documents: Dict[str, ScoredDocument] = {}
 
     for item in array:
         key = get_key(item)
-        if key not in keys:
-            keys.append(key)
-            vals.append(item)
 
-    return vals
+        if key in documents:
+            document = documents[key]
+            if item.score > document.score:
+                documents[key] = item
+        else:
+            documents[key] = item
+
+    return sort(list(documents.values()))
 
 
 def flatten(array: list):
