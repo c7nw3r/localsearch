@@ -9,3 +9,8 @@ def write_json(path: str, document: dict, indent=None):
 
     with open(path, "w") as f:
         f.write(json.dumps(document, indent=indent))
+
+
+def read_json(path: str):
+    with open(path, "r") as f:
+        return json.load(f)

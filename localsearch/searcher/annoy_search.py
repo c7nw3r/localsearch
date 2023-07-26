@@ -1,4 +1,3 @@
-import json
 import os
 from dataclasses import dataclass, field, asdict
 from typing import List, Optional, Union
@@ -7,6 +6,7 @@ import numpy as np
 
 from localsearch.__spi__ import IndexedDocument, Reader, Encoder, Writer, ScoredDocument, Document
 from localsearch.__util__.array_utils import cosine_similarity
+from localsearch.__util__.io_utils import read_json
 
 
 @dataclass
@@ -104,6 +104,5 @@ class AnnoySearch(Reader, Writer):
         self.index.save(self.path)
 
     def _read_document(self, idx: int) -> IndexedDocument:
-        folder = self.path.replace(".ann", "")
-        with open(f"{folder}/{idx}.json") as f:
-            return IndexedDocument(**json.load(f), index=self.config.index_name)
+        path = f"{self.path.replace('.ann', '')}/{idx}.json"
+        return IndexedDocument(**read_json(path), index=self.config.index_name)
