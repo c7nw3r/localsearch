@@ -21,7 +21,7 @@ def sort(array: List[ScoredDocument]):
     def sort_by_score(document: ScoredDocument):
         return document.score
 
-    return list(sorted(array, key=sort_by_score))
+    return list(sorted(array, key=sort_by_score, reverse=True))
 
 
 def unique(array: List[ScoredDocument], get_key):
