@@ -17,7 +17,7 @@ class DummyCrossEncoder(CrossEncoder):
 class PipelineTest(TestCase):
 
     # noinspection PyMethodMayBeStatic
-    def test_semantic_search(self):
+    def test_pipeline_with_cross_encoder(self):
         config = TantivyConfig(lang="de")
         searcher = TantivySearch(config)
 
@@ -25,4 +25,15 @@ class PipelineTest(TestCase):
         [searcher.append(document) for _ in range(5)]
 
         pipeline = SearchPipeline([searcher], DummyCrossEncoder())
+        print(pipeline.search("Beispiel Text"))
+
+    # noinspection PyMethodMayBeStatic
+    def test_pipeline_without_cross_encoder(self):
+        config = TantivyConfig(lang="de")
+        searcher = TantivySearch(config)
+
+        document = Document("abcd", {"text": "Beispiel Text"})
+        [searcher.append(document) for _ in range(5)]
+
+        pipeline = SearchPipeline([searcher])
         print(pipeline.search("Beispiel Text"))

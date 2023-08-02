@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 import numpy as np
 
@@ -11,7 +11,7 @@ from localsearch.__util__.string_utils import md5
 
 class SearchPipeline:
 
-    def __init__(self, readers: List[Reader], reranker: CrossEncoder):
+    def __init__(self, readers: List[Reader], reranker: Optional[CrossEncoder] = None):
         self.readers = readers
         self.reranker = reranker
 
@@ -22,9 +22,13 @@ class SearchPipeline:
         if len(queries) == 0:
             return []
 
-        scores = self.reranker(queries)
-        # noinspection PyTypeChecker
-        indices = list(reversed(np.argsort(scores).tolist()))
+        if self.reranker is not None:
+            scores = self.reranker(queries)
+            # noinspection PyTypeChecker
+            indices = list(reversed(np.argsort(scores).tolist()))
+        else:
+            scores = np.ones(len(queries))
+            indices = [i for i in range(len(queries))]
 
         def to_ranked_document(document: ScoredDocument, rank_score: float):
             return RankedDocument(score=document.score, document=document.document, rank_score=rank_score)
