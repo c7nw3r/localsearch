@@ -30,7 +30,7 @@ class AnnoySearch(Reader, Writer):
         try:
             from annoy import AnnoyIndex
 
-            self.path = config.path + "/data.ann"
+            self.path = config.path + f"/{config.index_name}.ann"
             self.encoder = encoder
             self.index = AnnoyIndex(encoder.get_output_dim(), 'euclidean')
             self.AnnoyIndex = AnnoyIndex
