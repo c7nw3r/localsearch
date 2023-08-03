@@ -26,7 +26,11 @@ class Writer(ABC):
 class Traverser(ABC):
 
     @abstractmethod
-    def add_edges(self, source_id: str, target_id: str, edge_type: str):
+    def add_node(self, node_id: str, fields: dict):
+        pass
+
+    @abstractmethod
+    def add_edge(self, source_id: str, target_id: str, edge_type: str):
         pass
 
     @abstractmethod

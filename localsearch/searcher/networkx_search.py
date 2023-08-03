@@ -26,6 +26,9 @@ class NetworkxSearch(Traverser, Reader, Writer):
     def remove(self, idx: int):
         pass
 
+    def add_node(self, node_id: str, fields: dict):
+        self.graph.add_nodes_from([(node_id, fields)])
+
     def add_edges(self, source_id: str, target_id: str, edge_type: str):
         edge = {"source_id": source_id, "target_id": target_id, "type": edge_type}
         self.graph.add_edges_from([source_id, target_id, edge])
