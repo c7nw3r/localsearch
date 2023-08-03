@@ -6,7 +6,7 @@ from localsearch.__spi__ import Writer, Reader, Documents, Traverser
 
 class NetworkxSearch(Traverser, Reader, Writer):
 
-    def __init__(self, path: Optional[str]):
+    def __init__(self, path: Optional[str] = None):
         import networkx as nx
         if path is not None:
             self.graph = nx.read_graphml(path)
