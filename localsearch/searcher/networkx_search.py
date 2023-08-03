@@ -45,6 +45,6 @@ class NetworkxSearch(Traverser, Reader, Writer):
         nodes = filter(lambda x: x[0] == node_id, nodes)
         return list(map(lambda x: x[1], nodes))[0]
 
-    def _save(self):
+    def _save(self, path: str):
         import networkx as nx
-        nx.write_graphml(self.graph, "./graph.ml")
+        nx.write_graphml(self.graph, path)
