@@ -1,8 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List, Union, Literal, Protocol, Sized, Optional, Tuple
 
-from localsearch import Document
-from localsearch.__spi__ import ScoredDocument
+from localsearch.__spi__ import Document, ScoredDocument
 
 
 class Reader(ABC):
