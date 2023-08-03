@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Union, List
 
 
 @dataclass
@@ -21,3 +22,6 @@ class Document:
 @dataclass
 class IndexedDocument(Document):
     index: str
+
+
+Documents = Union[Document, List[Document]]

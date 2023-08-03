@@ -36,11 +36,18 @@ setup(
         'Programming Language :: Python :: 3',
     ],
     extras_require={
-        'annoy': ["annoy==1.17.3"],
+        'annoy': [
+            "annoy==1.17.3",
+            "pysbd==0.3.4"
+        ],
         'tantivy': [
             "tantivy@git+https://github.com/leftshiftone/tantivy-py.git#egg=tantivy",
             "stop-words==2018.7.23",
-            "simplemma==0.9.1"
+            "simplemma==0.9.1",
+            "pysbd==0.3.4"
+        ],
+        'networkx': [
+            "networkx==3.1"
         ]
     }
 )

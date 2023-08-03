@@ -1,3 +1,8 @@
+from typing import List
+
+from localsearch.__spi__ import Lang
+
+
 def remove_punctuation(text: str):
     text = text.replace("?", "")
     text = text.replace("!", "")
@@ -7,14 +12,14 @@ def remove_punctuation(text: str):
     return text
 
 
-def remove_stopwords(text: str, lang: str):
+def remove_stopwords(text: str, lang: Lang):
     from stop_words import get_stop_words
 
     stop_words = get_stop_words(lang)
     return " ".join([e for e in text.split(" ") if e.lower() not in stop_words])
 
 
-def lemmatize(text: str, lang: str):
+def lemmatize(text: str, lang: Lang):
     import simplemma
 
     tokens = text.split(" ")
@@ -26,3 +31,11 @@ def lemmatize(text: str, lang: str):
 def md5(text: str):
     from hashlib import md5
     return str(md5(text.encode("utf-8")).hexdigest())
+
+
+def split_sentences(text: str, language: Lang, chunk_size: int = 3) -> List[str]:
+    import pysbd
+    seg = pysbd.Segmenter(language=language, clean=False)
+    sentences = seg.segment(text)
+
+    return [sentences[i:i + chunk_size] for i in range(0, len(sentences), chunk_size)]

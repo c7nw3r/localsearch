@@ -2,3 +2,5 @@ annoy==1.17.3
 -e git+https://github.com/quickwit-oss/tantivy-py.git#egg=tantivy
 stop-words
 simplemma
+pysbd==0.3.4
+networkx==3.1

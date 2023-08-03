@@ -24,6 +24,7 @@ class TantivySearch(Reader):
         try:
             import tantivy
 
+            # TODO: append index_name to path
             if config.path is not None and not os.path.exists(config.path):
                 os.makedirs(config.path)
 

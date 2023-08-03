@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import List, Union, Literal, Protocol, Sized, Optional, Tuple
 
-from localsearch.__spi__ import IndexedDocument, ScoredDocument
+from localsearch import Document
+from localsearch.__spi__ import ScoredDocument
 
 
 class Reader(ABC):
@@ -14,11 +15,30 @@ class Reader(ABC):
 class Writer(ABC):
 
     @abstractmethod
-    def append(self, documents: List[IndexedDocument]):
+    def append(self, documents: Union[Document, List[Document]]):
         pass
 
     @abstractmethod
     def remove(self, idx: int):
+        pass
+
+
+class Traverser(ABC):
+
+    @abstractmethod
+    def add_edges(self, source_id: str, target_id: str, edge_type: str):
+        pass
+
+    @abstractmethod
+    def get_edges(self, node_id: str):
+        pass
+
+    @abstractmethod
+    def search_by_type(self, node_type: str):
+        pass
+
+    @abstractmethod
+    def search_by_id(self, node_id: str):
         pass
 
 
