@@ -1,9 +1,7 @@
 from typing import List, Optional
 
 from localsearch import ScoredDocument
-from localsearch.__spi__ import Writer, Reader
-from localsearch.__spi__.model import Documents
-from localsearch.__spi__.types import Traverser
+from localsearch.__spi__ import Writer, Reader, Documents, Traverser
 
 
 class NetworkxSearch(Traverser, Reader, Writer):
