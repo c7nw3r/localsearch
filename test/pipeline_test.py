@@ -1,9 +1,11 @@
-from typing import Union, List
+import os
+from tempfile import mkdtemp
+from typing import List, Union
 from unittest import TestCase
 
 from localsearch.__spi__ import Document
-from localsearch.__spi__.types import Vector, CrossEncoder, TextPair
-from localsearch.pipeline import SearchPipeline
+from localsearch.__spi__.types import CrossEncoder, TextPair, Vector
+from localsearch.pipeline import IndexPipeline, SearchPipeline
 from localsearch.searcher.tantivy_search import TantivyConfig, TantivySearch
 
 
@@ -37,3 +39,16 @@ class PipelineTest(TestCase):
 
         pipeline = SearchPipeline([searcher])
         print(pipeline.search("Beispiel Text"))
+
+    def test_index_pipeline(self):
+        config = TantivyConfig(lang="de")
+        writer = TantivySearch(config)
+
+        tmp_dir = mkdtemp()
+        pipeline = IndexPipeline(tmp_dir, [writer])
+
+        docs = [Document("abcd", {"text": "Beispiel Text"}) for _ in range(5)]
+
+        pipeline.add(docs)
+
+        self.assertEqual(len(os.listdir(tmp_dir)), 5)

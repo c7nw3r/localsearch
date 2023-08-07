@@ -3,7 +3,7 @@ import os
 from dataclasses import dataclass, field
 from typing import List, Union, Optional
 
-from localsearch.__spi__ import ScoredDocument, Document, Reader, Lang, IndexedDocument
+from localsearch.__spi__ import ScoredDocument, Document, Reader, Lang, IndexedDocument, Writer
 from localsearch.__util__.string_utils import remove_punctuation, lemmatize, remove_stopwords
 
 
@@ -17,7 +17,7 @@ class TantivyConfig:
     index_fields: List[str] = field(default_factory=lambda: ["text"])
 
 
-class TantivySearch(Reader):
+class TantivySearch(Reader, Writer):
 
     # noinspection PyUnresolvedReferences
     def __init__(self, config: TantivyConfig, readonly: bool = False):
@@ -75,6 +75,10 @@ class TantivySearch(Reader):
             writer.add_document(tantivy_document)
 
         writer.commit()
+
+    def remove(self, idx: int):
+        # TODO: no python binding for IndexWriter.delete_term(...)
+        pass
 
     def _canonicalize(self, text: str):
         """

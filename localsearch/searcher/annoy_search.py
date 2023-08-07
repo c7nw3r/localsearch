@@ -6,16 +6,17 @@ import numpy as np
 
 from localsearch.__spi__ import IndexedDocument, Reader, Encoder, Writer, ScoredDocument, Document
 from localsearch.__util__.array_utils import cosine_similarity
-from localsearch.__util__.io_utils import read_json
+from localsearch.__util__.io_utils import read_json, write_json
 
 
 @dataclass
 class AnnoyConfig:
-    n: Optional[int] = 5
-    k: Optional[int] = 5
-    path: Optional[str] = None
+    path: str
+    raw_data_dir: Optional[str] = None
+    n: int = 5
+    k: int = 5
     lang: Optional[str] = None
-    index_name: Optional[str] = field(default_factory=lambda: "annoy")
+    index_name: Optional[str] = "annoy"
     index_fields: Optional[List[str]] = field(default_factory=lambda: ["text"])
 
 
@@ -69,14 +70,15 @@ class AnnoySearch(Reader, Writer):
 
         for i, vector in enumerate(vectors):
             self.index.add_item(idx + i, vector)
-            from localsearch.__util__.io_utils import write_json
-            write_json(f"{folder}/{idx + i}.json", asdict(documents[i]))
+            if not self.config.raw_data_dir:
+                write_json(f"{folder}/{idx + i}.json", asdict(documents[i]))
 
         self._save()
 
     def remove(self, idx: int):
-        folder = self.path.replace(".ann", "")
-        os.remove(f"{folder}/{idx}.json")
+        if not self.config.raw_data_dir:
+            folder = self.path.replace(".ann", "")
+            os.remove(f"{folder}/{idx}.json")
 
         self._rebuild()
         self._save()
@@ -88,13 +90,16 @@ class AnnoySearch(Reader, Writer):
 
         For performance reasons it is recommended to append documents in batches.
         """
-        folder = self.path.replace(".ann", "")
         new_index = self.AnnoyIndex(self.encoder.get_output_dim(), 'euclidean')
+        folder = self.config.raw_data_dir if self.config.raw_data_dir else self.path.replace(".ann", "")
         for path in os.listdir(folder):
             if path.endswith(".json"):
                 idx = int(path.replace(".json", ""))
-                vector = self.index.get_item_vector(idx)
-                new_index.add_item(idx, vector)
+                try:
+                    vector = self.index.get_item_vector(idx)
+                    new_index.add_item(idx, vector)
+                except Exception:
+                    pass
 
         os.remove(self.path)
         self.index = new_index

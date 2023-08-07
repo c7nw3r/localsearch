@@ -1,12 +1,16 @@
+from dataclasses import asdict
 from typing import List, Optional
+import os
+from pathlib import Path
 
 import numpy as np
 
-from localsearch.__spi__ import Reader
-from localsearch.__spi__.model import RankedDocument, ScoredDocument
+from localsearch.__spi__ import Reader, Writer
+from localsearch.__spi__.model import RankedDocument, ScoredDocument, Documents
 from localsearch.__spi__.types import CrossEncoder
 from localsearch.__util__.array_utils import unique, flatten
 from localsearch.__util__.string_utils import md5
+from localsearch.__util__.io_utils import write_json
 
 
 class SearchPipeline:
@@ -38,3 +42,26 @@ class SearchPipeline:
         results = unique(results, lambda x: x.document.id)
         results = unique(results, lambda x: md5(x.document.fields[index_field]))
         return list(filter(lambda x: x.rank_score >= 0.001, results))
+
+
+class IndexPipeline:
+
+    def __init__(self, raw_data_dir: str, writers: List[Writer]) -> None:
+        self._raw_data_dir = raw_data_dir
+        self._writers = writers
+
+    def add(self, docs: Documents) -> None:
+        docs = docs if isinstance(docs, list) else [docs]
+        for idx, doc in enumerate(docs, self._get_start_idx()):
+            write_json(Path(self._raw_data_dir) / f"{idx}.json", asdict(doc))
+
+        for writer in self._writers:
+            writer.append(docs)
+
+    def _get_start_idx(self) -> int:
+        idxs = [
+            int(fn.removesuffix(".json")) for fn in os.listdir(self._raw_data_dir)
+            if fn.endswith(".json")
+        ]
+
+        return max(idxs) + 1 if idxs else 0

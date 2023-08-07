@@ -1,5 +1,5 @@
 annoy==1.17.3
--e git+https://github.com/quickwit-oss/tantivy-py.git#egg=tantivy
+tantivy @ git+https://github.com/leftshiftone/tantivy-py.git
 stop-words
 simplemma
 pysbd==0.3.4
