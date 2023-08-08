@@ -1,4 +1,4 @@
-from dataclasses import asdict
+from dataclasses import dataclass, asdict
 from typing import List, Optional
 import os
 from pathlib import Path
@@ -13,13 +13,26 @@ from localsearch.__util__.string_utils import md5
 from localsearch.__util__.io_utils import write_json
 
 
+@dataclass
+class SearchConfig:
+    n: int = 5
+    min_rank_score: float = 0.001
+    unique_hash: bool = True
+
+
 class SearchPipeline:
 
     def __init__(self, readers: List[Reader], reranker: Optional[CrossEncoder] = None):
         self.readers = readers
         self.reranker = reranker
 
-    def search(self, query: str, index_field: str = "text") -> List[RankedDocument]:
+    def search(
+            self,
+            query: str,
+            index_field: str = "text",
+            config: SearchConfig = SearchConfig()
+    ) -> List[RankedDocument]:
+
         results = flatten([reader.read(query) for reader in self.readers])
         queries = list(map(lambda x: (query, x.document.fields[index_field]), results))
 
@@ -31,7 +44,7 @@ class SearchPipeline:
             # noinspection PyTypeChecker
             indices = list(reversed(np.argsort(scores).tolist()))
         else:
-            scores = np.zeros(len(queries))
+            scores = np.full(len(queries), config.min_rank_score)
             indices = [i for i in range(len(queries))]
 
         def to_ranked_document(document: ScoredDocument, rank_score: float):
@@ -40,8 +53,11 @@ class SearchPipeline:
         results = [to_ranked_document(result, score.item()) for result, score in zip(results, scores)]
         results = [results[i] for i in indices]
         results = unique(results, lambda x: x.document.id)
-        results = unique(results, lambda x: md5(x.document.fields[index_field]))
-        return list(filter(lambda x: x.rank_score >= 0.001, results))
+        if config.unique_hash:
+            results = unique(results, lambda x: md5(x.document.fields[index_field]))
+        if config.min_rank_score > 0:
+            results = list(filter(lambda x: x.rank_score >= config.min_rank_score, results))
+        return results[:config.n]
 
 
 class IndexPipeline:
