@@ -31,7 +31,7 @@ class SearchPipeline:
             # noinspection PyTypeChecker
             indices = list(reversed(np.argsort(scores).tolist()))
         else:
-            scores = np.ones(len(queries))
+            scores = np.zeros(len(queries))
             indices = [i for i in range(len(queries))]
 
         def to_ranked_document(document: ScoredDocument, rank_score: float):
