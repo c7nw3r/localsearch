@@ -18,7 +18,7 @@ class Writer(ABC):
         pass
 
     @abstractmethod
-    def remove(self, idx: int):
+    def remove(self, idx: int | str):
         pass
 
 
