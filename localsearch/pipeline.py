@@ -48,6 +48,8 @@ class IndexPipeline:
 
     def __init__(self, raw_data_dir: str, writers: List[Writer]) -> None:
         self._raw_data_dir = raw_data_dir
+        if not os.path.exists(raw_data_dir):
+            os.makedirs(raw_data_dir)
         self._writers = writers
 
     def add(self, docs: Documents) -> None:

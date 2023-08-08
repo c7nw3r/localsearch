@@ -109,5 +109,6 @@ class AnnoySearch(Reader, Writer):
         self.index.save(self.path)
 
     def _read_document(self, idx: int) -> IndexedDocument:
-        path = f"{self.path.replace('.ann', '')}/{idx}.json"
+        folder = self.config.raw_data_dir if self.config.raw_data_dir else self.path.replace(".ann", "")
+        path = f"{folder}/{idx}.json"
         return IndexedDocument(**read_json(path), index=self.config.index_name)
