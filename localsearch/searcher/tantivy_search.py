@@ -4,6 +4,8 @@ from dataclasses import dataclass, field
 from typing import List, Union, Optional
 
 from localsearch.__spi__ import ScoredDocument, Document, Reader, Lang, IndexedDocument, Writer
+from localsearch.__spi__.types import DocumentSplitter
+from localsearch.__util__ import flatten
 from localsearch.__util__.string_utils import remove_punctuation, lemmatize, remove_stopwords
 
 
@@ -15,6 +17,7 @@ class TantivyConfig:
     saturation: float = field(default_factory=lambda: 0)
     index_name: str = field(default_factory=lambda: "tantivy")
     index_fields: List[str] = field(default_factory=lambda: ["text"])
+    splitter: Optional[DocumentSplitter] = None
 
 
 class TantivySearch(Reader, Writer):
@@ -64,6 +67,9 @@ class TantivySearch(Reader, Writer):
 
         if len(documents) == 0:
             return
+
+        if self.config.splitter is not None:
+            documents = flatten([self.config.splitter(d) for d in documents])
 
         writer = self.index.writer()
         for document in documents:
