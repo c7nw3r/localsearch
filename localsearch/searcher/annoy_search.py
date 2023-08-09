@@ -5,7 +5,8 @@ from typing import List, Optional, Union, Literal
 import numpy as np
 
 from localsearch.__spi__ import IndexedDocument, Reader, Encoder, Writer, ScoredDocument, Document
-from localsearch.__util__.array_utils import cosine_similarity
+from localsearch.__spi__.types import DocumentSplitter
+from localsearch.__util__.array_utils import cosine_similarity, flatten
 from localsearch.__util__.io_utils import read_json, write_json
 
 
@@ -19,6 +20,7 @@ class AnnoyConfig:
     index_name: Optional[str] = "annoy"
     index_fields: Optional[List[str]] = field(default_factory=lambda: ["text"])
     metric: Literal["angular", "euclidean", "manhattan", "hamming", "dot"] = "euclidean"
+    splitter: Optional[DocumentSplitter] = None
 
 
 class AnnoySearch(Reader, Writer):
@@ -56,6 +58,9 @@ class AnnoySearch(Reader, Writer):
 
         if len(documents) == 0:
             return []
+
+        if self.config.splitter is not None:
+            documents = flatten([self.config.splitter(d) for d in documents])
 
         if os.path.exists(self.path):
             self._rebuild()

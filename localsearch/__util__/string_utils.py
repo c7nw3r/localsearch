@@ -1,5 +1,3 @@
-from typing import List
-
 from localsearch.__spi__ import Lang
 
 
@@ -31,16 +29,3 @@ def lemmatize(text: str, lang: Lang):
 def md5(text: str):
     from hashlib import md5
     return str(md5(text.encode("utf-8")).hexdigest())
-
-
-def split_sentences(
-        text: str,
-        language: Lang,
-        chunk_size: int = 3,
-        window_size: int = 1
-) -> List[str]:
-    import pysbd
-    seg = pysbd.Segmenter(language=language, clean=False)
-    sentences = seg.segment(text)
-
-    return [" ".join(sentences[i:i + chunk_size]) for i in range(0, len(sentences), chunk_size-window_size)]

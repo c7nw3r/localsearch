@@ -4,6 +4,7 @@ from unittest import TestCase
 from localsearch.__spi__ import Document, Encoder
 from localsearch.__spi__.types import Vector
 from localsearch.searcher.annoy_search import AnnoySearch, AnnoyConfig
+from localsearch.searcher.splitter.sentence_splitter import SentenceSplitter
 
 
 class DummyEncoder(Encoder):
@@ -35,4 +36,21 @@ class AnnoySearcherTest(TestCase):
 
         results = searcher.read("Beispiel Text")
         assert len(results) == 1
+        assert results[0].score == 1
+
+
+    # noinspection PyMethodMayBeStatic
+    def test_text_splitting(self):
+        import tempfile
+        from uuid import uuid4
+        tempdir = tempfile.gettempdir() + "/" + str(uuid4())
+
+        config = AnnoyConfig(lang="de", path=tempdir, splitter=SentenceSplitter(lang="de"))
+        searcher = AnnoySearch(config, DummyEncoder())
+
+        document = Document("abcd", {"text": "Das ist ein Beispiel Text. " * 5})
+        searcher.append(document)
+
+        results = searcher.read("Beispiel Text")
+        assert len(results) == 3
         assert results[0].score == 1

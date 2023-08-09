@@ -68,3 +68,10 @@ class CrossEncoder(Protocol):
 
 
 Lang = Literal["de", "en"]
+
+
+class DocumentSplitter(Protocol):
+
+    @abstractmethod
+    def __call__(self, document: Document) -> List[Document]:
+        pass
