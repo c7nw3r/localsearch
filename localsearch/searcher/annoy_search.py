@@ -1,6 +1,6 @@
 import os
 from dataclasses import dataclass, field, asdict
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Literal
 
 import numpy as np
 
@@ -18,6 +18,7 @@ class AnnoyConfig:
     lang: Optional[str] = None
     index_name: Optional[str] = "annoy"
     index_fields: Optional[List[str]] = field(default_factory=lambda: ["text"])
+    metric: Literal["angular", "euclidean", "manhattan", "hamming", "dot"] = "euclidean"
 
 
 class AnnoySearch(Reader, Writer):
@@ -33,7 +34,7 @@ class AnnoySearch(Reader, Writer):
 
             self.path = config.path + f"/{config.index_name}.ann"
             self.encoder = encoder
-            self.index = AnnoyIndex(encoder.get_output_dim(), 'euclidean')
+            self.index = AnnoyIndex(encoder.get_output_dim(), config.metric)
             self.AnnoyIndex = AnnoyIndex
             if os.path.exists(self.path):
                 self.index.load(self.path)
@@ -90,7 +91,7 @@ class AnnoySearch(Reader, Writer):
 
         For performance reasons it is recommended to append documents in batches.
         """
-        new_index = self.AnnoyIndex(self.encoder.get_output_dim(), 'euclidean')
+        new_index = self.AnnoyIndex(self.encoder.get_output_dim(), self.config.metric)
         folder = self.config.raw_data_dir if self.config.raw_data_dir else self.path.replace(".ann", "")
         for path in os.listdir(folder):
             if path.endswith(".json"):

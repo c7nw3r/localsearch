@@ -68,13 +68,18 @@ class IndexPipeline:
             os.makedirs(raw_data_dir)
         self._writers = writers
 
-    def add(self, docs: Documents) -> None:
+    def add(self, docs: Documents, batch_size: int | None = None) -> None:
         docs = docs if isinstance(docs, list) else [docs]
-        for idx, doc in enumerate(docs, self._get_start_idx()):
-            write_json(Path(self._raw_data_dir) / f"{idx}.json", asdict(doc))
+        batch_size = batch_size if batch_size else len(docs)
 
-        for writer in self._writers:
-            writer.append(docs)
+        for idx in range(0, len(docs), batch_size):
+            docs_batch = docs[idx: idx+batch_size]
+
+            for idx, doc in enumerate(docs_batch, self._get_start_idx()):
+                write_json(Path(self._raw_data_dir) / f"{idx}.json", asdict(doc))
+
+            for writer in self._writers:
+                writer.append(docs_batch)
 
     def _get_start_idx(self) -> int:
         idxs = [
