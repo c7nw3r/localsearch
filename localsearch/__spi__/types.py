@@ -4,14 +4,14 @@ from typing import List, Union, Literal, Protocol, Sized, Optional, Tuple
 from localsearch.__spi__ import Document, ScoredDocument
 
 
-class Reader(ABC):
+class Reader(Protocol):
 
     @abstractmethod
     def read(self, text: str, n: Optional[int] = None) -> List[ScoredDocument]:
         pass
 
 
-class Writer(ABC):
+class Writer(Protocol):
 
     @abstractmethod
     def append(self, documents: Union[Document, List[Document]]):

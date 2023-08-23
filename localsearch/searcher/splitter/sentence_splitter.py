@@ -1,3 +1,4 @@
+from abc import abstractmethod
 from dataclasses import dataclass
 from typing import List, Protocol
 
@@ -7,8 +8,20 @@ from localsearch.__spi__.types import DocumentSplitter, Lang
 
 class TextMerger(Protocol):
 
+    @abstractmethod
     def __call__(self, old_text: str, new_text: str) -> str:
-        return new_text
+        pass
+
+
+@dataclass
+class PrefixAwareTextMerger(TextMerger):
+    prefix: str
+
+    def __call__(self, old_text: str, new_text: str) -> str:
+        segments = old_text.split("\n")
+        segments = [e for e in segments if self.prefix in e]
+
+        return "\n".join(segments) + "\n" + new_text
 
 
 @dataclass
