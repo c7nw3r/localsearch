@@ -37,7 +37,7 @@ def split_sentences(
         language: Lang,
         chunk_size: int = 3,
         window_size: int = 1
-) -> List[str]:
+) -> list[str]:
     import pysbd
     seg = pysbd.Segmenter(language=language, clean=False)
     sentences = seg.segment(text)
@@ -49,6 +49,6 @@ def split_characters(
         text: str,
         window_size: int = 500,
         overlap: int = 100
-) -> List[str]:
+) -> list[str]:
 
     return [text[i: i+window_size] for i in range(0, len(text), window_size-overlap)]
