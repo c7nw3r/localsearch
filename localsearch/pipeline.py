@@ -90,7 +90,7 @@ class IndexPipeline:
 
     def add_full_sources(self, sources: dict[str, dict]) -> None:
         for key, content in sources.items():
-            write_json(Path(self._raw_data_dir) / "full_sources", content)
+            write_json(Path(self._raw_data_dir) / "full_sources" / f"{key}.json", content)
 
     def _get_start_idx(self) -> int:
         idxs = [
