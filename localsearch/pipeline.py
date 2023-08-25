@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 
 import numpy as np
+from tqdm import tqdm
 
 from localsearch.__spi__ import Reader, Writer
 from localsearch.__spi__.model import RankedDocument, ScoredDocument, Documents
@@ -62,17 +63,23 @@ class SearchPipeline:
 
 class IndexPipeline:
 
-    def __init__(self, raw_data_dir: str, writers: List[Writer]) -> None:
+    def __init__(
+            self,
+            raw_data_dir: str,
+            writers: List[Writer],
+    ) -> None:
+
         self._raw_data_dir = raw_data_dir
         if not os.path.exists(raw_data_dir):
             os.makedirs(raw_data_dir)
         self._writers = writers
 
-    def add(self, docs: Documents, batch_size: int | None = None) -> None:
+    def add(self, docs: Documents, batch_size: int | None = None, verbose: bool = False) -> None:
         docs = docs if isinstance(docs, list) else [docs]
         batch_size = batch_size if batch_size else len(docs)
 
-        for idx in range(0, len(docs), batch_size):
+        idxs = range(0, len(docs), batch_size)
+        for idx in tqdm(idxs, total=len(idxs)) if verbose else idxs:
             docs_batch = docs[idx: idx+batch_size]
 
             for idx, doc in enumerate(docs_batch, self._get_start_idx()):
@@ -80,6 +87,10 @@ class IndexPipeline:
 
             for writer in self._writers:
                 writer.append(docs_batch)
+
+    def add_full_sources(self, sources: dict[str, dict]) -> None:
+        for key, content in sources.items():
+            write_json(Path(self._raw_data_dir) / "full_sources", content)
 
     def _get_start_idx(self) -> int:
         idxs = [
