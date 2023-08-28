@@ -14,14 +14,14 @@ def filter_common_context(
         results: list[RankedDocument],
         chars_before: int,
         chars_after: int,
-        doc_id_field: str,
+        source_id_field: str,
         text_start_idx_field: str
 ) -> list[RankedDocument]:
 
     context_spans: list[ContextSpan] = []
     filtered_results = []
     for res in results:
-        doc_id = res.document.fields[doc_id_field]
+        doc_id = res.document.fields[source_id_field]
         text_start_idx = res.document.fields[text_start_idx_field]
         in_existing_context = False
         for cs in context_spans:
