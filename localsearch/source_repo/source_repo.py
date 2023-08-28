@@ -6,7 +6,7 @@ from localsearch.__spi__.model import Source
 class SourceRepo(ABC):
 
     @abstractmethod
-    def add(self, sources: list[Source]) -> None:
+    def add(self, source: Source) -> None:
         pass
 
     @abstractmethod
