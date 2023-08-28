@@ -32,7 +32,8 @@ class Source:
 @dataclass
 class TextSource(Source):
     text: str
-    fields: dict
+    title: str | None
+    fields: dict | None
 
 
 Documents = Union[Document, List[Document]]
