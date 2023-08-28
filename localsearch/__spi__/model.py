@@ -24,4 +24,15 @@ class IndexedDocument(Document):
     index: str
 
 
+@dataclass
+class Source:
+    id: str
+
+
+@dataclass
+class TextSource(Source):
+    text: str
+    fields: dict
+
+
 Documents = Union[Document, List[Document]]
