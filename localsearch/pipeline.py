@@ -35,6 +35,7 @@ class SearchPipeline:
     ) -> List[RankedDocument]:
 
         results = flatten([reader.read(query) for reader in self.readers])
+        results = unique(results, lambda x: x.document.id)
         queries = list(map(lambda x: (query, x.document.fields[index_field]), results))
 
         if len(queries) == 0:
@@ -53,7 +54,6 @@ class SearchPipeline:
 
         results = [to_ranked_document(result, score.item()) for result, score in zip(results, scores)]
         results = [results[i] for i in indices]
-        results = unique(results, lambda x: x.document.id)
         if config.unique_hash:
             results = unique(results, lambda x: md5(x.document.fields[index_field]))
         if config.min_rank_score > 0:
