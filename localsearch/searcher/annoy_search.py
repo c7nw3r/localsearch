@@ -45,10 +45,12 @@ class AnnoySearch(Reader, Writer):
             raise ValueError("no annoy library found, please install localsearch[annoy]")
 
     def read(self, text: str, n: Optional[int] = None) -> List[ScoredDocument]:
+        folder = self.path.replace(".ann", "")
         vector = self.encoder(text)
         indices = self.index.get_nns_by_vector(vector, n or self.config.n, search_k=self.config.k)
         vectors = [self.index.get_item_vector(i) for i in indices]
         scores = [cosine_similarity(np.array(item), vector) for item in vectors]
+        indices = [read_json(f"{folder}/id_num/{e + 1}.json")["id"] for e in indices]
 
         documents = [self._read_document(idx) for idx in indices]
         return [ScoredDocument(s, d) for s, d in zip(scores, documents)]
@@ -77,14 +79,19 @@ class AnnoySearch(Reader, Writer):
         for i, vector in enumerate(vectors):
             self.index.add_item(idx + i, vector)
             if not self.config.raw_data_dir:
-                write_json(f"{folder}/{idx + i}.json", asdict(documents[i]))
+                write_json(f"{folder}/{documents[i].id}.json", asdict(documents[i]))
+                write_json(f"{folder}/id_num/{idx + 1}.json", {"id": documents[i].id})
+                write_json(f"{folder}/id_str/{documents[i].id}.json", {"id": idx + 1})
 
         self._save()
 
-    def remove(self, idx: int):
+    def remove(self, idx: str):
         if not self.config.raw_data_dir:
             folder = self.path.replace(".ann", "")
+            id_str = read_json(f"{folder}/id_str/{idx}.json")
             os.remove(f"{folder}/{idx}.json")
+            os.remove(f"{folder}/id_str/{idx}.json")
+            os.remove(f"{folder}/id_num/{id_str['id']}.json")
 
         self._rebuild()
         self._save()

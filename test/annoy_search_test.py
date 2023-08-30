@@ -38,6 +38,10 @@ class AnnoySearcherTest(TestCase):
         assert len(results) == 1
         assert results[0].score == 1
 
+        searcher.remove("abcd")
+        results = searcher.read("Beispiel Text")
+        assert len(results) == 0
+
     # noinspection PyMethodMayBeStatic
     def test_text_splitting(self):
         import tempfile

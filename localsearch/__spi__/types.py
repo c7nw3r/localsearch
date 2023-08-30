@@ -18,7 +18,7 @@ class Writer(Protocol):
         pass
 
     @abstractmethod
-    def remove(self, idx: int | str):
+    def remove(self, idx: str):
         pass
 
 

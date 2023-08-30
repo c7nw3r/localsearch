@@ -82,9 +82,10 @@ class TantivySearch(Reader, Writer):
 
         writer.commit()
 
-    def remove(self, idx: int):
-        # TODO: no python binding for IndexWriter.delete_term(...)
-        pass
+    def remove(self, idx: str):
+        writer = self.index.writer()
+        writer.delete_documents("id", idx)
+        writer.commit()
 
     def _canonicalize(self, text: str):
         """

@@ -17,3 +17,7 @@ class TantivySearcherTest(TestCase):
         results = searcher.read("Beispiel Text")
         assert len(results) == 1
         assert results[0].score == 1
+
+        searcher.remove("abcd")
+        results = searcher.read("Beispiel Text")
+        assert len(results) == 0

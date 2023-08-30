@@ -21,7 +21,7 @@ class NetworkxSearch(Traverser, Reader, Writer):
         nodes = [(e.id, e.fields) for e in documents]
         self.graph.add_nodes_from(nodes)
 
-    def remove(self, idx: int):
+    def remove(self, idx: str):
         pass
 
     def add_node(self, node_id: str, fields: dict):
