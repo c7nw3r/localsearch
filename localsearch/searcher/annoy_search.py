@@ -50,7 +50,7 @@ class AnnoySearch(Reader, Writer):
         indices = self.index.get_nns_by_vector(vector, n or self.config.n, search_k=self.config.k)
         vectors = [self.index.get_item_vector(i) for i in indices]
         scores = [cosine_similarity(np.array(item), vector) for item in vectors]
-        indices = [read_json(f"{folder}/id_num/{e + 1}.json")["id"] for e in indices]
+        indices = [read_json(f"{folder}/id_num/{e}.json")["id"] for e in indices]
 
         documents = [self._read_document(idx) for idx in indices]
         return [ScoredDocument(s, d) for s, d in zip(scores, documents)]
@@ -80,8 +80,8 @@ class AnnoySearch(Reader, Writer):
             self.index.add_item(idx + i, vector)
             if not self.config.raw_data_dir:
                 write_json(f"{folder}/{documents[i].id}.json", asdict(documents[i]))
-                write_json(f"{folder}/id_num/{idx + 1}.json", {"id": documents[i].id})
-                write_json(f"{folder}/id_str/{documents[i].id}.json", {"id": idx + 1})
+                write_json(f"{folder}/id_num/{idx}.json", {"id": documents[i].id})
+                write_json(f"{folder}/id_str/{documents[i].id}.json", {"id": idx})
 
         self._save()
 
@@ -109,11 +109,8 @@ class AnnoySearch(Reader, Writer):
             if path.endswith(".json"):
                 idx = path.replace(".json", "")
                 idx = read_json(f"{folder}/id_str/{idx}.json")["id"]
-                try:
-                    vector = self.index.get_item_vector(idx)
-                    new_index.add_item(idx, vector)
-                except Exception:
-                    pass
+                vector = self.index.get_item_vector(idx)
+                new_index.add_item(idx, vector)
 
         os.remove(self.path)
         self.index = new_index
