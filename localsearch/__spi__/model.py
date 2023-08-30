@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Union, List
+from typing import ClassVar, List, Literal, Union
 
 
 @dataclass
@@ -32,8 +32,23 @@ class Source:
 @dataclass
 class TextSource(Source):
     text: str
-    title: str | None
-    fields: dict | None
+    title: str | None = None
+    fields: dict | None = None
+    type: Literal["TextSource"] = "TextSource"
+
+
+@dataclass
+class SourcePart:
+    text: str
+    title: str | None = None
+    fields: dict | None = None
+
+
+@dataclass
+class StructuredSource(Source):
+    title: str
+    parts: list[SourcePart]
+    type: Literal["StructuredSource"] = "StructuredSource"
 
 
 Documents = Union[Document, List[Document]]
