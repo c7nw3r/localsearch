@@ -107,7 +107,8 @@ class AnnoySearch(Reader, Writer):
         folder = self.config.raw_data_dir if self.config.raw_data_dir else self.path.replace(".ann", "")
         for path in os.listdir(folder):
             if path.endswith(".json"):
-                idx = int(path.replace(".json", ""))
+                idx = path.replace(".json", "")
+                idx = read_json(f"{folder}/id_str/{idx}.json")["id"]
                 try:
                     vector = self.index.get_item_vector(idx)
                     new_index.add_item(idx, vector)
