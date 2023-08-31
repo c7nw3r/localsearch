@@ -1,13 +1,13 @@
 import os
 from dataclasses import dataclass, field, asdict
-from typing import List, Optional, Union, Literal
+from typing import List, Optional, Union, Literal, Dict
 
 import numpy as np
 
-from localsearch.__spi__ import IndexedDocument, Reader, Encoder, Writer, ScoredDocument, Document
-from localsearch.__spi__.types import DocumentSplitter
+from localsearch.__spi__ import IndexedDocument, Encoder, ScoredDocument, Document
+from localsearch.__spi__.types import DocumentSplitter, Searcher
 from localsearch.__util__.array_utils import cosine_similarity, flatten
-from localsearch.__util__.io_utils import read_json, write_json
+from localsearch.__util__.io_utils import read_json, write_json, grep, list_files
 
 
 @dataclass
@@ -23,7 +23,7 @@ class AnnoyConfig:
     splitter: Optional[DocumentSplitter] = None
 
 
-class AnnoySearch(Reader, Writer):
+class AnnoySearch(Searcher):
     """
     Semantic search implementation which is based on the annoy library (https://github.com/spotify/annoy)
 
@@ -38,19 +38,22 @@ class AnnoySearch(Reader, Writer):
             self.encoder = encoder
             self.index = AnnoyIndex(encoder.get_output_dim(), config.metric)
             self.AnnoyIndex = AnnoyIndex
+            self.id_map: Dict[int, str] = {}
             if os.path.exists(self.path):
                 self.index.load(self.path)
+                folder = self.path.replace(".ann", "")
+                files = [e.replace(".json", "") for e in list_files(folder, recursive=True)]
+                self.id_map = {int(e.split("_")[1]): e.split("_")[0] for e in files}
             self.config = config
         except ImportError:
             raise ValueError("no annoy library found, please install localsearch[annoy]")
 
     def read(self, text: str, n: Optional[int] = None) -> List[ScoredDocument]:
-        folder = self.path.replace(".ann", "")
         vector = self.encoder(text)
         indices = self.index.get_nns_by_vector(vector, n or self.config.n, search_k=self.config.k)
         vectors = [self.index.get_item_vector(i) for i in indices]
         scores = [cosine_similarity(np.array(item), vector) for item in vectors]
-        indices = [read_json(f"{folder}/id_num/{e}.json")["id"] for e in indices]
+        indices = [self.id_map[e] for e in indices]
 
         documents = [self._read_document(idx) for idx in indices]
         return [ScoredDocument(s, d) for s, d in zip(scores, documents)]
@@ -77,21 +80,18 @@ class AnnoySearch(Reader, Writer):
         vectors = self.encoder(batch)
 
         for i, vector in enumerate(vectors):
+            self.id_map[idx + i] = documents[i].id
             self.index.add_item(idx + i, vector)
             if not self.config.raw_data_dir:
-                write_json(f"{folder}/{documents[i].id}.json", asdict(documents[i]))
-                write_json(f"{folder}/id_num/{idx}.json", {"id": documents[i].id})
-                write_json(f"{folder}/id_str/{documents[i].id}.json", {"id": idx})
+                document = documents[i]
+                write_json(f"{folder}/{document.source}/{document.id}_{idx + i}.json", asdict(documents[i]))
 
         self._save()
 
     def remove(self, idx: str):
         if not self.config.raw_data_dir:
             folder = self.path.replace(".ann", "")
-            id_str = read_json(f"{folder}/id_str/{idx}.json")
-            os.remove(f"{folder}/{idx}.json")
-            os.remove(f"{folder}/id_str/{idx}.json")
-            os.remove(f"{folder}/id_num/{id_str['id']}.json")
+            os.remove(grep(folder, idx))
 
         self._rebuild()
         self._save()
@@ -105,10 +105,9 @@ class AnnoySearch(Reader, Writer):
         """
         new_index = self.AnnoyIndex(self.encoder.get_output_dim(), self.config.metric)
         folder = self.config.raw_data_dir if self.config.raw_data_dir else self.path.replace(".ann", "")
-        for path in os.listdir(folder):
+        for path in list_files(folder, recursive=True):
             if path.endswith(".json"):
-                idx = path.replace(".json", "")
-                idx = read_json(f"{folder}/id_str/{idx}.json")["id"]
+                idx = int(path.replace(".json", "").split("_")[1])
                 vector = self.index.get_item_vector(idx)
                 new_index.add_item(idx, vector)
 
@@ -119,7 +118,11 @@ class AnnoySearch(Reader, Writer):
         self.index.build(10)
         self.index.save(self.path)
 
-    def _read_document(self, idx: int) -> IndexedDocument:
+    def _read_document(self, idx: str) -> IndexedDocument:
         folder = self.config.raw_data_dir if self.config.raw_data_dir else self.path.replace(".ann", "")
-        path = f"{folder}/{idx}.json"
-        return IndexedDocument(**read_json(path), index=self.config.index_name)
+        return IndexedDocument(**read_json(grep(folder, idx)), index=self.config.index_name)
+
+    def search_by_source(self, source: str) -> List[Document]:
+        folder = self.config.raw_data_dir if self.config.raw_data_dir else self.path.replace(".ann", "")
+        files = list_files(f"{folder}/{source}")
+        return [Document(**read_json(f"{folder}/{source}/{e}")) for e in files]

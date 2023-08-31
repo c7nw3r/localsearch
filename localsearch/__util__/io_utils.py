@@ -14,3 +14,20 @@ def write_json(path: str, document: dict, indent=None):
 def read_json(path: str):
     with open(path, "r") as f:
         return json.load(f)
+
+
+def grep(folder: str, prefix: str):
+    for root, _, files in os.walk(folder):
+        for file in files:
+            if file.startswith(prefix):
+                return f"{root}/{file}"
+    return None
+
+
+def list_files(path: str, recursive: bool = False):
+    if not recursive:
+        return os.listdir(path)
+    all_files = []
+    for _, _, files in os.walk(path):
+        all_files.extend(files)
+    return all_files

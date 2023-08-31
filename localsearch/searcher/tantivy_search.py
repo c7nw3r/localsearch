@@ -3,8 +3,8 @@ import os
 from dataclasses import dataclass, field
 from typing import List, Union, Optional
 
-from localsearch.__spi__ import ScoredDocument, Document, Reader, Lang, IndexedDocument, Writer
-from localsearch.__spi__.types import DocumentSplitter
+from localsearch.__spi__ import ScoredDocument, Document, Lang, IndexedDocument
+from localsearch.__spi__.types import DocumentSplitter, Searcher
 from localsearch.__util__ import flatten
 from localsearch.__util__.string_utils import remove_punctuation, lemmatize, remove_stopwords
 
@@ -20,7 +20,7 @@ class TantivyConfig:
     splitter: Optional[DocumentSplitter] = None
 
 
-class TantivySearch(Reader, Writer):
+class TantivySearch(Searcher):
 
     # noinspection PyUnresolvedReferences
     def __init__(self, config: TantivyConfig, readonly: bool = False):
@@ -34,6 +34,7 @@ class TantivySearch(Reader, Writer):
             schema_builder = tantivy.SchemaBuilder()
             schema_builder.add_text_field("id", stored=True)
             schema_builder.add_text_field("text", stored=True, tokenizer_name=f"{config.lang}_stem")
+            schema_builder.add_text_field("source", stored=True)
             schema_builder.add_json_field("fields", stored=True)
             schema = schema_builder.build()
 
@@ -58,6 +59,7 @@ class TantivySearch(Reader, Writer):
 
         return [ScoredDocument(result[0], IndexedDocument(
             id=result[1]["id"][0],
+            source=result[1]["source"][0],
             index=self.config.index_name,
             fields=result[1].to_dict()["fields"][0]
         )) for result in results]
@@ -73,10 +75,10 @@ class TantivySearch(Reader, Writer):
 
         writer = self.index.writer()
         for document in documents:
-            text = " ".join([document.fields[e] for e in self.config.index_fields])
+            text = self._canonicalize(" ".join([document.fields[e] for e in self.config.index_fields]))
 
             # noinspection PyArgumentList
-            tantivy_document = self.TantivyDocument(id=document.id, text=self._canonicalize(text))
+            tantivy_document = self.TantivyDocument(id=document.id, source=document.source, text=text)
             tantivy_document.add_json("fields", json.dumps(document.fields))
             writer.add_document(tantivy_document)
 
@@ -98,3 +100,18 @@ class TantivySearch(Reader, Writer):
         text = remove_stopwords(text, self.config.lang)
         text = lemmatize(text, self.config.lang)
         return text
+
+    def search_by_source(self, source: str) -> List[Document]:
+        # Reload the index to ensure it points to the last commit.
+        self.index.reload()
+        searcher = self.index.searcher()
+
+        query = self.index.parse_query(source, ["source"])
+        results = searcher.search(query, 200 or self.config.n).hits
+        results = [(result[0], searcher.doc(result[1])) for result in results]
+
+        return [Document(
+            id=result[1]["id"][0],
+            source=result[1]["source"][0],
+            fields=result[1].to_dict()["fields"][0]
+        ) for result in results]

@@ -1,15 +1,11 @@
-from typing import Union, List, Optional, Protocol
+from typing import Union, List, Optional
 
 from localsearch import Document, ScoredDocument
-from localsearch.__spi__ import Reader, Writer
+from localsearch.__spi__.types import Searcher
 from localsearch.__util__ import flatten
 
 
-class Searcher(Reader, Writer, Protocol):
-    pass
-
-
-class SearchEnsemble(Reader, Writer):
+class SearchEnsemble(Searcher):
 
     def __init__(self, searchers: List[Searcher]):
         self.searchers = searchers
@@ -22,3 +18,6 @@ class SearchEnsemble(Reader, Writer):
 
     def remove(self, idx: int | str):
         [e.remove(idx) for e in self.searchers]
+
+    def search_by_source(self, source: str) -> List[Document]:
+        return flatten([e.search_by_source(source) for e in self.searchers])

@@ -22,6 +22,13 @@ class Writer(Protocol):
         pass
 
 
+class Searcher(Reader, Writer, Protocol):
+
+    @abstractmethod
+    def search_by_source(self, source: str) -> List[Document]:
+        pass
+
+
 class Traverser(ABC):
 
     @abstractmethod

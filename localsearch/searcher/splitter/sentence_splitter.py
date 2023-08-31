@@ -38,7 +38,7 @@ class SentenceSplitter(DocumentSplitter):
         sentences = segmenter.segment(document.fields[self.text_field])
 
         def split_document(i: int, new_text: str):
-            new_document = Document(id=document.id, fields={**document.fields})
+            new_document = Document(id=document.id, source=document.source, fields={**document.fields})
             new_document.id += f"#{i}"
 
             old_text = new_document.fields[self.text_field]

@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import ClassVar, List, Literal, Union
+from typing import List, Literal, Union
 
 
 @dataclass
@@ -16,6 +16,7 @@ class RankedDocument(ScoredDocument):
 @dataclass
 class Document:
     id: str
+    source: str
     fields: dict
 
 
