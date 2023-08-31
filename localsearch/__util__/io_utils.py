@@ -40,3 +40,8 @@ def delete_file(path: str):
         os.remove(path)
     except:
         print(f"error while deleting file {path}")
+
+
+def delete_folder(path: str):
+    import shutil
+    shutil.rmtree(path)

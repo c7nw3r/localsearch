@@ -7,7 +7,7 @@ import numpy as np
 from localsearch.__spi__ import IndexedDocument, Encoder, ScoredDocument, Document
 from localsearch.__spi__.types import Searcher
 from localsearch.__util__.array_utils import cosine_similarity
-from localsearch.__util__.io_utils import read_json, write_json, grep, list_files, delete_file
+from localsearch.__util__.io_utils import read_json, write_json, grep, list_files, delete_file, delete_folder
 
 
 @dataclass
@@ -79,7 +79,6 @@ class AnnoySearch(Searcher):
             self.index.add_item(idx + i, vector)
             if not self.config.raw_data_dir:
                 document = documents[i]
-                print("write", f"{folder}/{document.source}/{document.id}_{idx + i}.json")
                 write_json(f"{folder}/{document.source}/{document.id}_{idx + i}.json", asdict(documents[i]))
 
         self._save()
@@ -118,7 +117,15 @@ class AnnoySearch(Searcher):
         folder = self.config.raw_data_dir if self.config.raw_data_dir else self.path.replace(".ann", "")
         return IndexedDocument(**read_json(grep(folder, idx)), index=self.config.index_name)
 
-    def search_by_source(self, source: str) -> List[Document]:
+    def search_by_source(self, source: str, n: Optional[int] = None) -> List[Document]:
         folder = self.config.raw_data_dir if self.config.raw_data_dir else self.path.replace(".ann", "")
         files = list_files(f"{folder}/{source}")
         return [Document(**read_json(f"{folder}/{source}/{e}")) for e in files]
+
+    def remove_by_source(self, source: str):
+        folder = self.config.raw_data_dir if self.config.raw_data_dir else self.path.replace(".ann", "")
+        delete_folder(f"{folder}/{source}")
+
+        self._rebuild()
+        self._save()
+

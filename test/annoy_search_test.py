@@ -66,3 +66,22 @@ class AnnoySearcherTest(TestCase):
 
         results = searcher.search_by_source("source")
         assert len(results) == 3
+
+    def test_remove_by_source(self):
+        import tempfile
+        from uuid import uuid4
+        tempdir = tempfile.gettempdir() + "/" + str(uuid4())
+
+        config = AnnoyConfig(path=tempdir)
+        searcher = AnnoySearch(config, DummyEncoder())
+
+        searcher.append(Document("abcd1", "source", {"text": "Beispiel Text"}))
+        searcher.append(Document("abcd2", "source", {"text": "Beispiel Text"}))
+        searcher.append(Document("abcd3", "source", {"text": "Beispiel Text"}))
+        searcher.append(Document("abcd4", "source", {"text": "Beispiel Text"}))
+
+        searcher = AnnoySearch(config, DummyEncoder())
+        searcher.remove_by_source("source")
+
+        results = searcher.read("Beispiel Text")
+        assert len(results) == 0

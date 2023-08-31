@@ -96,13 +96,13 @@ class TantivySearch(Searcher):
         text = lemmatize(text, self.config.lang)
         return text
 
-    def search_by_source(self, source: str) -> List[Document]:
+    def search_by_source(self, source: str, n: Optional[int] = None) -> List[Document]:
         # Reload the index to ensure it points to the last commit.
         self.index.reload()
         searcher = self.index.searcher()
 
         query = self.index.parse_query(source, ["source"])
-        results = searcher.search(query, 200 or self.config.n).hits
+        results = searcher.search(query, n or self.config.n).hits
         results = [(result[0], searcher.doc(result[1])) for result in results]
 
         return [Document(
@@ -110,3 +110,9 @@ class TantivySearch(Searcher):
             source=result[1]["source"][0],
             fields=result[1].to_dict()["fields"][0]
         ) for result in results]
+
+    def remove_by_source(self, source: str):
+        writer = self.index.writer()
+        writer.delete_documents("source", source)
+        writer.commit()
+

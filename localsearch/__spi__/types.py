@@ -25,7 +25,11 @@ class Writer(Protocol):
 class Searcher(Reader, Writer, Protocol):
 
     @abstractmethod
-    def search_by_source(self, source: str) -> List[Document]:
+    def search_by_source(self, source: str, n: Optional[int] = None) -> List[Document]:
+        pass
+
+    @abstractmethod
+    def remove_by_source(self, source: str):
         pass
 
 
