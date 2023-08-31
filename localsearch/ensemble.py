@@ -16,7 +16,7 @@ class SearchEnsemble(Searcher):
     def append(self, documents: Union[Document, List[Document]]):
         [e.append(documents) for e in self.searchers]
 
-    def remove(self, idx: int | str):
+    def remove(self, idx: str):
         [e.remove(idx) for e in self.searchers]
 
     def search_by_source(self, source: str) -> List[Document]:

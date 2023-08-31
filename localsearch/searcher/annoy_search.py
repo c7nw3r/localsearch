@@ -7,7 +7,7 @@ import numpy as np
 from localsearch.__spi__ import IndexedDocument, Encoder, ScoredDocument, Document
 from localsearch.__spi__.types import DocumentSplitter, Searcher
 from localsearch.__util__.array_utils import cosine_similarity, flatten
-from localsearch.__util__.io_utils import read_json, write_json, grep, list_files
+from localsearch.__util__.io_utils import read_json, write_json, grep, list_files, delete_file
 
 
 @dataclass
@@ -91,7 +91,7 @@ class AnnoySearch(Searcher):
     def remove(self, idx: str):
         if not self.config.raw_data_dir:
             folder = self.path.replace(".ann", "")
-            os.remove(grep(folder, idx))
+            delete_file(grep(folder, idx))
 
         self._rebuild()
         self._save()

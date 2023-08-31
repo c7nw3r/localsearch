@@ -21,6 +21,8 @@ def grep(folder: str, prefix: str):
         for file in files:
             if file.startswith(prefix):
                 return f"{root}/{file}"
+
+    print(f"no file found in folder {folder} with prefix {prefix}")
     return None
 
 
@@ -31,3 +33,10 @@ def list_files(path: str, recursive: bool = False):
     for _, _, files in os.walk(path):
         all_files.extend(files)
     return all_files
+
+
+def delete_file(path: str):
+    try:
+        os.remove(path)
+    except:
+        print(f"error while deleting file {path}")
