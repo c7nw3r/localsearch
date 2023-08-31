@@ -1,13 +1,14 @@
 import os
-from dataclasses import dataclass, field, asdict
-from typing import List, Optional, Union, Literal, Dict
+from dataclasses import asdict, dataclass, field
+from pathlib import Path
+from typing import Dict, List, Literal, Optional, Union
 
 import numpy as np
 
-from localsearch.__spi__ import IndexedDocument, Encoder, ScoredDocument, Document
+from localsearch.__spi__ import Document, Encoder, IndexedDocument, ScoredDocument
 from localsearch.__spi__.types import Searcher
 from localsearch.__util__.array_utils import cosine_similarity
-from localsearch.__util__.io_utils import read_json, write_json, grep, list_files, delete_file, delete_folder
+from localsearch.__util__.io_utils import delete_file, delete_folder, grep, list_files, read_json, write_json
 
 
 @dataclass
@@ -101,8 +102,9 @@ class AnnoySearch(Searcher):
         new_index = self.AnnoyIndex(self.encoder.get_output_dim(), self.config.metric)
         folder = self.config.raw_data_dir if self.config.raw_data_dir else self.path.replace(".ann", "")
         for path in list_files(folder, recursive=True):
-            if path.endswith(".json"):
-                idx = int(path.replace(".json", "").split("_")[1])
+            path = Path(path)
+            if path.suffix == ".json":
+                idx = int(path.stem) if self.config.raw_data_dir else int(path.stem.split("_")[1])
                 vector = self.index.get_item_vector(idx)
                 new_index.add_item(idx, vector)
 
@@ -128,4 +130,3 @@ class AnnoySearch(Searcher):
 
         self._rebuild()
         self._save()
-
