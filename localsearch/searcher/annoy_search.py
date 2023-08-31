@@ -5,8 +5,8 @@ from typing import List, Optional, Union, Literal, Dict
 import numpy as np
 
 from localsearch.__spi__ import IndexedDocument, Encoder, ScoredDocument, Document
-from localsearch.__spi__.types import DocumentSplitter, Searcher
-from localsearch.__util__.array_utils import cosine_similarity, flatten
+from localsearch.__spi__.types import Searcher
+from localsearch.__util__.array_utils import cosine_similarity
 from localsearch.__util__.io_utils import read_json, write_json, grep, list_files, delete_file
 
 
@@ -16,11 +16,9 @@ class AnnoyConfig:
     raw_data_dir: Optional[str] = None
     n: int = 5
     k: int = 5
-    lang: Optional[str] = None
     index_name: Optional[str] = "annoy"
     index_fields: Optional[List[str]] = field(default_factory=lambda: ["text"])
     metric: Literal["angular", "euclidean", "manhattan", "hamming", "dot"] = "euclidean"
-    splitter: Optional[DocumentSplitter] = None
 
 
 class AnnoySearch(Searcher):
@@ -64,9 +62,6 @@ class AnnoySearch(Searcher):
         if len(documents) == 0:
             return []
 
-        if self.config.splitter is not None:
-            documents = flatten([self.config.splitter(d) for d in documents])
-
         if os.path.exists(self.path):
             self._rebuild()
 
@@ -84,6 +79,7 @@ class AnnoySearch(Searcher):
             self.index.add_item(idx + i, vector)
             if not self.config.raw_data_dir:
                 document = documents[i]
+                print("write", f"{folder}/{document.source}/{document.id}_{idx + i}.json")
                 write_json(f"{folder}/{document.source}/{document.id}_{idx + i}.json", asdict(documents[i]))
 
         self._save()
@@ -91,7 +87,7 @@ class AnnoySearch(Searcher):
     def remove(self, idx: str):
         if not self.config.raw_data_dir:
             folder = self.path.replace(".ann", "")
-            delete_file(grep(folder, idx))
+            delete_file(grep(folder, idx + "_"))
 
         self._rebuild()
         self._save()
