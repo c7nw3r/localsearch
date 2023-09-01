@@ -17,7 +17,7 @@ class AnnoyConfig:
     raw_data_dir: Optional[str] = None
     n: int = 5
     n_trees: int = 10
-    search_k: int | None = None
+    search_k: int = -1  # defaults to n_trees * n
     index_name: Optional[str] = "annoy"
     index_fields: Optional[List[str]] = field(default_factory=lambda: ["text"])
     metric: Literal["angular", "euclidean", "manhattan", "hamming", "dot"] = "euclidean"
@@ -50,11 +50,7 @@ class AnnoySearch(Searcher):
 
     def read(self, text: str, n: Optional[int] = None) -> List[ScoredDocument]:
         vector = self.encoder(text)
-        indices = self.index.get_nns_by_vector(
-            vector,
-            n or self.config.n,
-            search_k=self.config.search_k or n*self.config.n_trees
-        )
+        indices = self.index.get_nns_by_vector(vector, n or self.config.n, self.config.search_k)
         vectors = [self.index.get_item_vector(i) for i in indices]
         scores = [cosine_similarity(np.array(item), vector) for item in vectors]
         indices = [self.id_map[e] for e in indices]
