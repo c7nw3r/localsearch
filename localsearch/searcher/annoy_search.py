@@ -14,7 +14,7 @@ from localsearch.__util__.io_utils import delete_file, delete_folder, grep, list
 @dataclass
 class AnnoyConfig:
     path: str
-    raw_data_dir: Optional[str] = None
+    raw_data_dir: Optional[str] = None  # TODO: better handling in AnnoySearch methods
     n: int = 5
     n_trees: int = 10
     search_k: int = -1  # defaults to n_trees * n
@@ -53,7 +53,8 @@ class AnnoySearch(Searcher):
         indices = self.index.get_nns_by_vector(vector, n or self.config.n, self.config.search_k)
         vectors = [self.index.get_item_vector(i) for i in indices]
         scores = [cosine_similarity(np.array(item), vector) for item in vectors]
-        indices = [self.id_map[e] for e in indices]
+        if not self.config.raw_data_dir:
+            indices = [self.id_map[e] for e in indices]
 
         documents = [self._read_document(idx) for idx in indices]
         return [ScoredDocument(s, d) for s, d in zip(scores, documents)]
@@ -117,8 +118,11 @@ class AnnoySearch(Searcher):
         self.index.save(self.path)
 
     def _read_document(self, idx: str) -> IndexedDocument:
-        folder = self.config.raw_data_dir if self.config.raw_data_dir else self.path.replace(".ann", "")
-        return IndexedDocument(**read_json(grep(folder, idx)), index=self.config.index_name)
+        if folder := self.config.raw_data_dir:
+            return IndexedDocument(**read_json(Path(folder) / f"{idx}.json"), index=self.config.index_name)
+        else:
+            folder = self.path.replace(".ann", "")
+            return IndexedDocument(**read_json(grep(folder, idx)), index=self.config.index_name)
 
     def search_by_source(self, source: str, n: Optional[int] = None) -> List[Document]:
         folder = self.config.raw_data_dir if self.config.raw_data_dir else self.path.replace(".ann", "")
