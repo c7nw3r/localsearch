@@ -82,11 +82,11 @@ class IndexPipeline:
         for idx in tqdm(idxs, total=len(idxs)) if verbose else idxs:
             docs_batch = docs[idx: idx+batch_size]
 
-            for idx, doc in enumerate(docs_batch, self._get_start_idx()):
-                write_json(Path(self._raw_data_dir) / f"{idx}.json", asdict(doc))
-
             for writer in self._writers:
                 writer.append(docs_batch)
+
+            for idx, doc in enumerate(docs_batch, self._get_start_idx()):
+                write_json(Path(self._raw_data_dir) / f"{idx}.json", asdict(doc))
 
     def _get_start_idx(self) -> int:
         idxs = [

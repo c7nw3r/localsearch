@@ -50,11 +50,10 @@ def get_full_context(
         source: StructuredSource,
         chars_before: int,
         chars_after: int,
-        source_id_field: str = "source_id",
         source_part_field: str = "source_part",
         text_start_idx_field: str = "text_start_idx",
         doc_title_prefix: str = "Document title:",
-        section_title_prefix: str = "Section_title:"
+        section_title_prefix: str = "Section title:"
 ) -> str:
 
     source_part: int = result.document.fields[source_part_field]
