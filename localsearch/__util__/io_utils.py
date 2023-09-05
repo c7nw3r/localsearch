@@ -43,5 +43,6 @@ def delete_file(path: str):
 
 
 def delete_folder(path: str):
-    import shutil
-    shutil.rmtree(path)
+    if os.path.exists(path):
+        import shutil
+        shutil.rmtree(path)
