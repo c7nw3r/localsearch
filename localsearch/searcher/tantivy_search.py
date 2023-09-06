@@ -94,7 +94,7 @@ class TantivySearch(Searcher):
         text = remove_punctuation(text)
         text = remove_stopwords(text, self.config.lang)
         text = lemmatize(text, self.config.lang)
-        text = text.replace("-", " ")  # leads to tantivy syntax error
+        text = '"' + text + '"'
         return text
 
     def search_by_source(self, source: str, n: Optional[int] = None) -> List[Document]:
