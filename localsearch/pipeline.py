@@ -1,17 +1,16 @@
-from dataclasses import dataclass, asdict
-from typing import List, Optional
 import os
+from dataclasses import dataclass, asdict
 from pathlib import Path
+from typing import List, Optional
 
 import numpy as np
 from tqdm import tqdm
 
-from localsearch.__spi__ import Reader, Writer
 from localsearch.__spi__.model import RankedDocument, ScoredDocument, Documents
-from localsearch.__spi__.types import CrossEncoder
+from localsearch.__spi__.types import CrossEncoder, Searcher
 from localsearch.__util__.array_utils import unique, flatten
-from localsearch.__util__.string_utils import md5
 from localsearch.__util__.io_utils import write_json
+from localsearch.__util__.string_utils import md5
 
 
 @dataclass
@@ -23,20 +22,19 @@ class SearchConfig:
 
 class SearchPipeline:
 
-    def __init__(self, readers: List[Reader], reranker: Optional[CrossEncoder] = None):
+    def __init__(self, readers: List[Searcher], reranker: Optional[CrossEncoder] = None):
         self.readers = readers
         self.reranker = reranker
 
     def search(
             self,
             query: str,
-            index_field: str = "text",
             config: SearchConfig = SearchConfig()
     ) -> List[RankedDocument]:
 
-        results = flatten([reader.read(query) for reader in self.readers])
-        results = unique(results, lambda x: x.document.id)
-        queries = list(map(lambda x: (query, x.document.fields[index_field]), results))
+        results = flatten([reader.search_by_text(query) for reader in self.readers])
+        # results = unique(results, lambda x: x.document.id)
+        queries = list(map(lambda x: (query, x.document.text), results))
 
         if len(queries) == 0:
             return []
@@ -55,7 +53,7 @@ class SearchPipeline:
         results = [to_ranked_document(result, score.item()) for result, score in zip(results, scores)]
         results = [results[i] for i in indices]
         if config.unique_hash:
-            results = unique(results, lambda x: md5(x.document.fields[index_field]))
+            results = unique(results, lambda x: md5(x.document.text))
         if config.min_rank_score > 0:
             results = list(filter(lambda x: x.rank_score >= config.min_rank_score, results))
         return results[:config.n]
@@ -66,7 +64,7 @@ class IndexPipeline:
     def __init__(
             self,
             raw_data_dir: str,
-            writers: List[Writer],
+            writers: List[Searcher],
     ) -> None:
 
         self._raw_data_dir = raw_data_dir

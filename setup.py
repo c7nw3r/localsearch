@@ -7,17 +7,19 @@ from setuptools import find_packages, setup
 
 long_description = Path(__file__).with_name("README.md").read_text()
 
+version = "0.2.0"
+
 setup(
     name='localsearch',
     packages=find_packages(exclude=("test")),
-    version='0.1.0',
+    version=version,
     license='Apache Software License',
     description='tbd',
     long_description=long_description,
     long_description_content_type="text/markdown",
     author='c7nw3r',
     url='https://github.com/c7nw3r/localsearch',
-    download_url='https://github.com/c7nw3r/localsearch/archive/refs/tags/v0.1.0.tar.gz',
+    download_url=f'https://github.com/c7nw3r/localsearch/archive/refs/tags/v{version}.tar.gz',
     keywords=['fulltext-search', 'semantic-search'],
     setup_requires=['setuptools_scm'],
     include_package_data=True,

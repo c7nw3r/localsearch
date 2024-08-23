@@ -15,9 +15,10 @@ class RankedDocument(ScoredDocument):
 
 @dataclass
 class Document:
-    id: str
-    source: str
-    fields: dict
+    name: str
+    type: str
+    text: str
+    data: dict
 
 
 @dataclass

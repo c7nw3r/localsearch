@@ -1,10 +1,9 @@
-from typing import List, Optional
+from typing import Optional
 
-from localsearch import ScoredDocument
-from localsearch.__spi__ import Writer, Reader, Documents, Traverser
+from localsearch.__spi__ import Documents, Traverser
 
 
-class NetworkxSearch(Traverser, Reader, Writer):
+class NetworkxSearch(Traverser):
 
     def __init__(self, path: Optional[str] = None):
         import networkx as nx
@@ -12,10 +11,6 @@ class NetworkxSearch(Traverser, Reader, Writer):
             self.graph = nx.read_graphml(path)
         else:
             self.graph = nx.Graph()
-
-    def read(self, text: str, n: Optional[int] = None) -> List[ScoredDocument]:
-        # TODO: implement
-        pass
 
     def append(self, documents: Documents):
         nodes = [(e.id, e.fields) for e in documents]

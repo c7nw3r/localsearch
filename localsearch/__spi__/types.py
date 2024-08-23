@@ -4,32 +4,22 @@ from typing import List, Union, Literal, Protocol, Sized, Optional, Tuple
 from localsearch.__spi__ import Document, ScoredDocument
 
 
-class Reader(Protocol):
-
-    @abstractmethod
-    def read(self, text: str, n: Optional[int] = None) -> List[ScoredDocument]:
-        pass
-
-
-class Writer(Protocol):
+class Searcher(Protocol):
 
     @abstractmethod
     def append(self, documents: Union[Document, List[Document]]):
         pass
 
     @abstractmethod
-    def remove(self, idx: str):
-        pass
-
-
-class Searcher(Reader, Writer, Protocol):
-
-    @abstractmethod
-    def search_by_source(self, source: str, n: Optional[int] = None) -> List[Document]:
+    def search_by_text(self, text: str, n: Optional[int] = None) -> List[ScoredDocument]:
         pass
 
     @abstractmethod
-    def remove_by_source(self, source: str):
+    def search_by_name(self, name: str, n: Optional[int] = None) -> List[Document]:
+        pass
+
+    @abstractmethod
+    def remove_by_name(self, name: str):
         pass
 
 

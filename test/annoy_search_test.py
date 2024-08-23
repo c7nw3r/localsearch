@@ -19,7 +19,7 @@ class DummyEncoder(Encoder):
         return np.ones(100)
 
 
-class AnnoySearcherTest(TestCase):
+class AnnoySearchTest(TestCase):
 
     # noinspection PyMethodMayBeStatic
     def test_semantic_search(self):
@@ -30,15 +30,15 @@ class AnnoySearcherTest(TestCase):
         config = AnnoyConfig(path=tempdir)
         searcher = AnnoySearch(config, DummyEncoder())
 
-        document = Document("abcd", "source", {"text": "Beispiel Text"})
+        document = Document("abcd", "document", "Beispiel Text", {})
         searcher.append(document)
 
-        results = searcher.read("Beispiel Text")
+        results = searcher.search_by_text("Beispiel Text")
         assert len(results) == 1
         assert results[0].score == 1
 
-        searcher.remove("abcd")
-        results = searcher.read("Beispiel Text")
+        searcher.remove_by_name("abcd")
+        results = searcher.search_by_text("Beispiel Text")
         assert len(results) == 0
 
     def test_existing_index(self):
@@ -49,23 +49,23 @@ class AnnoySearcherTest(TestCase):
         config = AnnoyConfig(path=tempdir)
         searcher = AnnoySearch(config, DummyEncoder())
 
-        searcher.append(Document("abcd1", "source", {"text": "Beispiel Text"}))
-        searcher.append(Document("abcd2", "source", {"text": "Beispiel Text"}))
-        searcher.append(Document("abcd3", "source", {"text": "Beispiel Text"}))
-        searcher.append(Document("abcd4", "source", {"text": "Beispiel Text"}))
+        searcher.append(Document("abcd1", "document", "Beispiel Text", {}))
+        searcher.append(Document("abcd1", "document", "Beispiel Text", {}))
+        searcher.append(Document("abcd2", "document", "Beispiel Text", {}))
+        searcher.append(Document("abcd2", "document", "Beispiel Text", {}))
 
         searcher = AnnoySearch(config, DummyEncoder())
 
-        results = searcher.read("Beispiel Text")
+        results = searcher.search_by_text("Beispiel Text")
         assert len(results) == 4
         assert results[0].score == 1
 
-        searcher.remove("abcd1")
-        results = searcher.read("Beispiel Text")
-        assert len(results) == 3
+        searcher.remove_by_name("abcd1")
+        results = searcher.search_by_text("Beispiel Text")
+        assert len(results) == 2
 
-        results = searcher.search_by_source("source")
-        assert len(results) == 3
+        results = searcher.search_by_name("abcd2")
+        assert len(results) == 2
 
     def test_remove_by_source(self):
         import tempfile
@@ -75,13 +75,13 @@ class AnnoySearcherTest(TestCase):
         config = AnnoyConfig(path=tempdir)
         searcher = AnnoySearch(config, DummyEncoder())
 
-        searcher.append(Document("abcd1", "source", {"text": "Beispiel Text"}))
-        searcher.append(Document("abcd2", "source", {"text": "Beispiel Text"}))
-        searcher.append(Document("abcd3", "source", {"text": "Beispiel Text"}))
-        searcher.append(Document("abcd4", "source", {"text": "Beispiel Text"}))
+        searcher.append(Document("abcd", "document", "Beispiel Text", {}))
+        searcher.append(Document("abcd", "document", "Beispiel Text", {}))
+        searcher.append(Document("abcd", "document", "Beispiel Text", {}))
+        searcher.append(Document("abcd", "document", "Beispiel Text", {}))
 
         searcher = AnnoySearch(config, DummyEncoder())
-        searcher.remove_by_source("source")
+        searcher.remove_by_name("abcd")
 
-        results = searcher.read("Beispiel Text")
+        results = searcher.search_by_text("Beispiel Text")
         assert len(results) == 0

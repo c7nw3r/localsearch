@@ -40,16 +40,16 @@ class SearchEnsembleTest(TestCase):
         ensemble = CustomEnsemble()
 
         ensemble.append([
-            Document("abcd1", "source", {"text": "Beispiel Text"}),
-            Document("abcd2", "source", {"text": "Beispiel Text"}),
-            Document("abcd3", "source", {"text": "Beispiel Text"}),
-            Document("abcd4", "source", {"text": "Beispiel Text"})
+            Document("abcd", "document", "Beispiel Text", {}),
+            Document("abcd", "document", "Beispiel Text", {}),
+            Document("abcd", "document", "Beispiel Text", {}),
+            Document("abcd", "document", "Beispiel Text", {})
         ])
 
-        results = ensemble.read("Beispiel Text")
+        results = ensemble.search_by_text("Beispiel Text")
         assert len(results) == 8
         assert results[0].score == 1
 
-        ensemble.remove("abcd1")
-        results = ensemble.read("Beispiel Text")
-        assert len(results) == 6
+        ensemble.remove_by_name("abcd")
+        results = ensemble.search_by_text("Beispiel Text")
+        assert len(results) == 0

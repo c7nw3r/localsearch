@@ -15,7 +15,6 @@ class TantivyConfig:
     lang: Optional[Lang] = None
     saturation: float = field(default_factory=lambda: 0)
     index_name: str = field(default_factory=lambda: "tantivy")
-    index_fields: List[str] = field(default_factory=lambda: ["text"])
 
 
 class TantivySearch(Searcher):
@@ -30,10 +29,11 @@ class TantivySearch(Searcher):
                 os.makedirs(config.path)
 
             schema_builder = tantivy.SchemaBuilder()
-            schema_builder.add_text_field("id", stored=True)
+            schema_builder.add_text_field("uuid", stored=True)
+            schema_builder.add_text_field("name", stored=True)
+            schema_builder.add_text_field("type", stored=True)
             schema_builder.add_text_field("text", stored=True, tokenizer_name=f"{config.lang}_stem")
-            schema_builder.add_text_field("source", stored=True)
-            schema_builder.add_json_field("fields", stored=True)
+            schema_builder.add_json_field("data", stored=True)
             schema = schema_builder.build()
 
             self.TantivyDocument = tantivy.Document
@@ -42,7 +42,7 @@ class TantivySearch(Searcher):
         except ImportError:
             raise ValueError("no tantivy library found, please install localsearch[tantivy]")
 
-    def read(self, text: str, n: Optional[int] = None) -> List[ScoredDocument]:
+    def search_by_text(self, text: str, n: Optional[int] = None) -> List[ScoredDocument]:
         # Reload the index to ensure it points to the last commit.
         self.index.reload()
         searcher = self.index.searcher()
@@ -56,10 +56,11 @@ class TantivySearch(Searcher):
         results = [(_saturation(result[0]), searcher.doc(result[1])) for result in results]
 
         return [ScoredDocument(result[0], IndexedDocument(
-            id=result[1]["id"][0],
-            source=result[1]["source"][0],
+            name=result[1]["name"][0],
+            type=result[1]["type"][0],
+            text=result[1]["text"][0],
             index=self.config.index_name,
-            fields=result[1].to_dict()["fields"][0]
+            data=result[1].to_dict()["data"][0]
         )) for result in results]
 
     def append(self, documents: Union[Document, List[Document]]):
@@ -70,18 +71,13 @@ class TantivySearch(Searcher):
 
         writer = self.index.writer()
         for document in documents:
-            text = self._canonicalize(" ".join([document.fields[e] for e in self.config.index_fields]))
+            text = self._canonicalize(document.text)
 
             # noinspection PyArgumentList
-            tantivy_document = self.TantivyDocument(id=document.id, source=document.source, text=text)
-            tantivy_document.add_json("fields", json.dumps(document.fields))
+            tantivy_document = self.TantivyDocument(name=document.name, type=document.type, text=text)
+            tantivy_document.add_json("data", json.dumps(document.data))
             writer.add_document(tantivy_document)
 
-        writer.commit()
-
-    def remove(self, idx: str):
-        writer = self.index.writer()
-        writer.delete_documents("id", idx)
         writer.commit()
 
     def _canonicalize(self, text: str):
@@ -112,22 +108,23 @@ class TantivySearch(Searcher):
         text = text.replace("\\", " ")
         return text
 
-    def search_by_source(self, source: str, n: Optional[int] = None) -> List[Document]:
+    def search_by_name(self, source: str, n: Optional[int] = None) -> List[Document]:
         # Reload the index to ensure it points to the last commit.
         self.index.reload()
         searcher = self.index.searcher()
 
-        query = self.index.parse_query(source, ["source"])
+        query = self.index.parse_query(source, ["name"])
         results = searcher.search(query, n or self.config.n).hits
         results = [(result[0], searcher.doc(result[1])) for result in results]
 
         return [Document(
-            id=result[1]["id"][0],
-            source=result[1]["source"][0],
-            fields=result[1].to_dict()["fields"][0]
+            name=result[1]["name"][0],
+            type=result[1]["type"][0],
+            text=result[1]["text"][0],
+            data=result[1].to_dict()["data"][0]
         ) for result in results]
 
-    def remove_by_source(self, source: str):
+    def remove_by_name(self, source: str):
         writer = self.index.writer()
-        writer.delete_documents("source", source)
+        writer.delete_documents("name", source)
         writer.commit()

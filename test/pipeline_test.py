@@ -23,7 +23,7 @@ class PipelineTest(TestCase):
         config = TantivyConfig(lang="de")
         searcher = TantivySearch(config)
 
-        document = Document("abcd", {"text": "Beispiel Text"})
+        document = Document("abcd1", "abcd", "Beispiel Text", {})
         [searcher.append(document) for _ in range(5)]
 
         pipeline = SearchPipeline([searcher], DummyCrossEncoder())
@@ -34,7 +34,7 @@ class PipelineTest(TestCase):
         config = TantivyConfig(lang="de")
         searcher = TantivySearch(config)
 
-        document = Document("abcd", {"text": "Beispiel Text"})
+        document = Document("abcd1", "abcd", "Beispiel Text", {})
         [searcher.append(document) for _ in range(5)]
 
         pipeline = SearchPipeline([searcher])
@@ -47,7 +47,7 @@ class PipelineTest(TestCase):
         tmp_dir = mkdtemp()
         pipeline = IndexPipeline(tmp_dir, [writer])
 
-        docs = [Document("abcd", {"text": "Beispiel Text"}) for _ in range(5)]
+        docs = [Document("abcd1", "abcd", "Beispiel Text", {}) for _ in range(5)]
 
         pipeline.add(docs)
 
