@@ -1,6 +1,5 @@
 from typing import List, Dict
 
-import numpy as np
 from numpy import matmul
 from numpy.linalg import norm
 
@@ -8,6 +7,8 @@ from localsearch import ScoredDocument
 
 
 def cosine_similarity(a, b) -> float:
+    import numpy as np
+
     a = np.expand_dims(a, axis=0) if len(a.shape) == 1 else a
     b = np.expand_dims(b, axis=0) if len(b.shape) == 1 else b
     a_norm = a / norm(a, ord=2, axis=1, keepdims=True)

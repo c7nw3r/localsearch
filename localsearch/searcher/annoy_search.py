@@ -3,8 +3,6 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import List, Literal, Optional, Union
 
-import numpy as np
-
 from localsearch.__spi__ import Document, Encoder, IndexedDocument, ScoredDocument
 from localsearch.__spi__.types import Searcher
 from localsearch.__util__.array_utils import cosine_similarity
@@ -45,12 +43,11 @@ class AnnoySearch(Searcher):
             raise ValueError("no annoy library found, please install localsearch[annoy]")
 
     def search_by_text(self, text: str, n: Optional[int] = None) -> List[ScoredDocument]:
+        import numpy as np
         vector = self.encoder(text)
         indices = self.index.get_nns_by_vector(vector, n or self.config.n, self.config.search_k)
         vectors = [self.index.get_item_vector(i) for i in indices]
         scores = [cosine_similarity(np.array(item), vector) for item in vectors]
-        # if not self.config.raw_data_dir:
-        #     indices = [self.id_map[e] for e in indices]
 
         documents = [self._read_document(idx) for idx in indices]
         return [ScoredDocument(s, d) for s, d in zip(scores, documents)]

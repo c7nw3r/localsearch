@@ -3,7 +3,6 @@ from dataclasses import dataclass, asdict
 from pathlib import Path
 from typing import List, Optional
 
-import numpy as np
 from tqdm import tqdm
 
 from localsearch.__spi__.model import RankedDocument, ScoredDocument, Documents
@@ -31,6 +30,7 @@ class SearchPipeline:
             query: str,
             config: SearchConfig = SearchConfig()
     ) -> List[RankedDocument]:
+        import numpy as np
 
         results = flatten([reader.search_by_text(query) for reader in self.readers])
         # results = unique(results, lambda x: x.document.id)

@@ -7,7 +7,7 @@ from setuptools import find_packages, setup
 
 long_description = Path(__file__).with_name("README.md").read_text()
 
-version = "0.2.0"
+version = "0.2.1"
 
 setup(
     name='localsearch',
@@ -46,7 +46,8 @@ setup(
             "tantivy@git+https://github.com/leftshiftone/tantivy-py.git#egg=tantivy",
             "stop-words==2018.7.23",
             "simplemma==0.9.1",
-            "pysbd==0.3.4"
+            "pysbd==0.3.4",
+            "numpy==1.26.4"
         ],
         'networkx': [
             "networkx==3.1"
