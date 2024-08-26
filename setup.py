@@ -7,7 +7,7 @@ from setuptools import find_packages, setup
 
 long_description = Path(__file__).with_name("README.md").read_text()
 
-version = "0.2.3"
+version = "0.2.4"
 
 setup(
     name='localsearch',

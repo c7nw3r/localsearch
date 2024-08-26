@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, List
 
 from localsearch.__spi__.model import RankedDocument, StructuredSource
 
@@ -13,15 +13,15 @@ class ContextSpan:
 
 
 def filter_common_context(
-        results: list[RankedDocument],
+        results: List[RankedDocument],
         chars_before: int,
         chars_after: int,
         source_id_field: str = "source_id",
         source_part_field: str = "source_part",
         text_start_idx_field: str = "text_start_idx"
-) -> list[RankedDocument]:
+) -> List[RankedDocument]:
 
-    context_spans: list[ContextSpan] = []
+    context_spans: List[ContextSpan] = []
     filtered_results = []
     for res in results:
         source_id = res.document.fields[source_id_field]

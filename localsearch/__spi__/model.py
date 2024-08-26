@@ -49,7 +49,7 @@ class SourcePart:
 @dataclass
 class StructuredSource(Source):
     title: str
-    parts: list[SourcePart]
+    parts: List[SourcePart]
     type: Literal["StructuredSource"] = "StructuredSource"
 
 
