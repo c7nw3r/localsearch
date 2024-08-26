@@ -11,11 +11,7 @@ class Searcher(Protocol):
         pass
 
     @abstractmethod
-    def search_by_text(self, text: str, n: Optional[int] = None) -> List[ScoredDocument]:
-        pass
-
-    @abstractmethod
-    def search_by_name(self, name: str, n: Optional[int] = None) -> List[Document]:
+    def search(self, text: str, n: Optional[int] = None) -> List[ScoredDocument]:
         pass
 
     @abstractmethod

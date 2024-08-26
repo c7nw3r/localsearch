@@ -46,10 +46,10 @@ class SearchEnsembleTest(TestCase):
             Document("abcd", "document", "Beispiel Text", {})
         ])
 
-        results = ensemble.search_by_text("Beispiel Text")
+        results = ensemble.search("Beispiel Text")
         assert len(results) == 8
         assert results[0].score == 1
 
         ensemble.remove_by_name("abcd")
-        results = ensemble.search_by_text("Beispiel Text")
+        results = ensemble.search("Beispiel Text")
         assert len(results) == 0

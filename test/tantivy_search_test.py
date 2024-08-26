@@ -16,15 +16,15 @@ class TantivySearchTest(TestCase):
         searcher.append(Document("abcd2", "document", "Beispiel Text", {}))
         searcher.append(Document("abcd2", "document", "Beispiel Text", {}))
 
-        results = searcher.search_by_text("Beispiel Text")
+        results = searcher.search("Beispiel Text")
         assert len(results) == 4
         assert results[0].score == 1
 
         searcher.remove_by_name("abcd1")
-        results = searcher.search_by_text("Beispiel Text")
+        results = searcher.search("Beispiel Text")
         assert len(results) == 2
 
-        results = searcher.search_by_name("abcd2")
+        results = searcher.search("name:abcd2")
         assert len(results) == 2
 
     # noinspection PyMethodMayBeStatic
@@ -38,6 +38,6 @@ class TantivySearchTest(TestCase):
         searcher.append(Document("source", "document", "Beispiel Text", {}))
 
         searcher.remove_by_name("source")
-        results = searcher.search_by_text("Beispiel Text")
+        results = searcher.search("Beispiel Text")
 
         assert len(results) == 0

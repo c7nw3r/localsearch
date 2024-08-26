@@ -42,7 +42,7 @@ class AnnoySearch(Searcher):
         except ImportError:
             raise ValueError("no annoy library found, please install localsearch[annoy]")
 
-    def search_by_text(self, text: str, n: Optional[int] = None) -> List[ScoredDocument]:
+    def search(self, text: str, n: Optional[int] = None) -> List[ScoredDocument]:
         import numpy as np
         vector = self.encoder(text)
         indices = self.index.get_nns_by_vector(vector, n or self.config.n, self.config.search_k)
@@ -102,11 +102,6 @@ class AnnoySearch(Searcher):
     def _read_document(self, idx: str) -> IndexedDocument:
         folder = self.path.replace(".ann", "")
         return IndexedDocument(**read_json(grep(folder, str(idx))), index=self.config.index_name)
-
-    def search_by_name(self, source: str, n: Optional[int] = None) -> List[Document]:
-        folder = self.path.replace(".ann", "")
-        files = list_files(f"{folder}/{source}")
-        return [Document(**read_json(f"{folder}/{source}/{e}")) for e in files]
 
     def remove_by_name(self, source: str):
         folder = self.path.replace(".ann", "")

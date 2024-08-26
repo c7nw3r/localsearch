@@ -33,12 +33,12 @@ class AnnoySearchTest(TestCase):
         document = Document("abcd", "document", "Beispiel Text", {})
         searcher.append(document)
 
-        results = searcher.search_by_text("Beispiel Text")
+        results = searcher.search("Beispiel Text")
         assert len(results) == 1
         assert results[0].score == 1
 
         searcher.remove_by_name("abcd")
-        results = searcher.search_by_text("Beispiel Text")
+        results = searcher.search("Beispiel Text")
         assert len(results) == 0
 
     def test_existing_index(self):
@@ -56,15 +56,15 @@ class AnnoySearchTest(TestCase):
 
         searcher = AnnoySearch(config, DummyEncoder())
 
-        results = searcher.search_by_text("Beispiel Text")
+        results = searcher.search("Beispiel Text")
         assert len(results) == 4
         assert results[0].score == 1
 
         searcher.remove_by_name("abcd1")
-        results = searcher.search_by_text("Beispiel Text")
+        results = searcher.search("Beispiel Text")
         assert len(results) == 2
 
-        results = searcher.search_by_name("abcd2")
+        results = searcher.search("abcd2")
         assert len(results) == 2
 
     def test_remove_by_source(self):
@@ -83,5 +83,5 @@ class AnnoySearchTest(TestCase):
         searcher = AnnoySearch(config, DummyEncoder())
         searcher.remove_by_name("abcd")
 
-        results = searcher.search_by_text("Beispiel Text")
+        results = searcher.search("Beispiel Text")
         assert len(results) == 0

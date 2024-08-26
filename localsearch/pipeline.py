@@ -32,7 +32,7 @@ class SearchPipeline:
     ) -> List[RankedDocument]:
         import numpy as np
 
-        results = flatten([reader.search_by_text(query) for reader in self.readers])
+        results = flatten([reader.search(query) for reader in self.readers])
         # results = unique(results, lambda x: x.document.id)
         queries = list(map(lambda x: (query, x.document.text), results))
 

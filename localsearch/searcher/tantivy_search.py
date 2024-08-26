@@ -42,7 +42,7 @@ class TantivySearch(Searcher):
         except ImportError:
             raise ValueError("no tantivy library found, please install localsearch[tantivy]")
 
-    def search_by_text(self, text: str, n: Optional[int] = None) -> List[ScoredDocument]:
+    def search(self, text: str, n: Optional[int] = None) -> List[ScoredDocument]:
         # Reload the index to ensure it points to the last commit.
         self.index.reload()
         searcher = self.index.searcher()
@@ -50,8 +50,8 @@ class TantivySearch(Searcher):
         def _saturation(value):
             return value / (value + self.config.saturation)
 
-        query = self._canonicalize(text)
-        query = self.index.parse_query(query, ["text"])
+        # query = self._canonicalize(text)
+        query = self.index.parse_query(text, ["text"])
         results = searcher.search(query, n or self.config.n).hits
         results = [(_saturation(result[0]), searcher.doc(result[1])) for result in results]
 
@@ -107,22 +107,6 @@ class TantivySearch(Searcher):
         text = text.replace("*", " ")
         text = text.replace("\\", " ")
         return text
-
-    def search_by_name(self, source: str, n: Optional[int] = None) -> List[Document]:
-        # Reload the index to ensure it points to the last commit.
-        self.index.reload()
-        searcher = self.index.searcher()
-
-        query = self.index.parse_query(source, ["name"])
-        results = searcher.search(query, n or self.config.n).hits
-        results = [(result[0], searcher.doc(result[1])) for result in results]
-
-        return [Document(
-            name=result[1]["name"][0],
-            type=result[1]["type"][0],
-            text=result[1]["text"][0],
-            data=result[1].to_dict()["data"][0]
-        ) for result in results]
 
     def remove_by_name(self, source: str):
         writer = self.index.writer()
