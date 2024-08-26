@@ -28,11 +28,15 @@ class TantivySearch(Searcher):
             if config.path is not None and not os.path.exists(config.path):
                 os.makedirs(config.path)
 
+            kwargs = {}
+            if config.lang:
+                kwargs["tokenizer_name"] = f"{config.lang}_stem"
+
             schema_builder = tantivy.SchemaBuilder()
             schema_builder.add_text_field("uuid", stored=True)
             schema_builder.add_text_field("name", stored=True)
             schema_builder.add_text_field("type", stored=True)
-            schema_builder.add_text_field("text", stored=True, tokenizer_name=f"{config.lang}_stem")
+            schema_builder.add_text_field("text", stored=True, **kwargs)
             schema_builder.add_json_field("data", stored=True)
             schema = schema_builder.build()
 
@@ -71,10 +75,8 @@ class TantivySearch(Searcher):
 
         writer = self.index.writer()
         for document in documents:
-            text = self._canonicalize(document.text)
-
             # noinspection PyArgumentList
-            tantivy_document = self.TantivyDocument(name=document.name, type=document.type, text=text)
+            tantivy_document = self.TantivyDocument(name=document.name, type=document.type, text=document.text)
             tantivy_document.add_json("data", json.dumps(document.data))
             writer.add_document(tantivy_document)
 

@@ -8,7 +8,7 @@ class TantivySearchTest(TestCase):
 
     # noinspection PyMethodMayBeStatic
     def test_fulltext_search(self):
-        config = TantivyConfig(lang="de")
+        config = TantivyConfig()
         searcher = TantivySearch(config)
 
         searcher.append(Document("abcd1", "document", "Beispiel Text", {}))
