@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Optional
 
 from localsearch.__spi__.model import RankedDocument, StructuredSource
 
@@ -6,7 +7,7 @@ from localsearch.__spi__.model import RankedDocument, StructuredSource
 @dataclass
 class ContextSpan:
     source_id: str
-    source_part: int | None
+    source_part: Optional[int]
     start_idx: int
     end_idx: int
 

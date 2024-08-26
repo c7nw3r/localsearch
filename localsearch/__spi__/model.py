@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Literal, Union
+from typing import List, Literal, Union, Optional
 
 
 @dataclass
@@ -34,16 +34,16 @@ class Source:
 @dataclass
 class TextSource(Source):
     text: str
-    title: str | None = None
-    fields: dict | None = None
+    title: Optional[str] = None
+    fields: Optional[dict] = None
     type: Literal["TextSource"] = "TextSource"
 
 
 @dataclass
 class SourcePart:
     text: str
-    title: str | None = None
-    fields: dict | None = None
+    title: Optional[str] = None
+    fields: Optional[dict] = None
 
 
 @dataclass

@@ -72,7 +72,7 @@ class IndexPipeline:
             os.makedirs(raw_data_dir)
         self._writers = writers
 
-    def add(self, docs: Documents, batch_size: int | None = None, verbose: bool = False) -> None:
+    def add(self, docs: Documents, batch_size: Optional[int] = None, verbose: bool = False) -> None:
         docs = docs if isinstance(docs, list) else [docs]
         batch_size = batch_size if batch_size else len(docs)
 
